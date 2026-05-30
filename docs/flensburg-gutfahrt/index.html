@@ -2,119 +2,21 @@
 <html lang="de">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#15392c" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-title" content="Flensburg Gutfahrt" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <link rel="manifest" href="./manifest.webmanifest" />
-    <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
-    <link rel="icon" href="./assets/icon-192.png" />
-    <link rel="stylesheet" href="./vendor/leaflet/leaflet.css" />
-    <link rel="stylesheet" href="./src/styles.css" />
-    <title>Flensburg Gutfahrt Cockpit</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta http-equiv="refresh" content="0; url=../flensburg-rueckfahrt/" />
+    <title>Weiterleitung · Raid Radar</title>
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+          for (const registration of registrations) {
+            if (registration.scope.includes("/flensburg-gutfahrt/")) registration.unregister();
+          }
+        });
+      }
+      location.replace("../flensburg-rueckfahrt/");
+    </script>
   </head>
   <body>
-    <div id="app">
-      <header class="topbar">
-        <div>
-          <p class="eyebrow">Offline Race PWA</p>
-          <h1>Flensburg Gutfahrt</h1>
-        </div>
-        <div id="offlineBadge" class="badge">Loading</div>
-      </header>
-
-      <main>
-        <section class="cockpit" aria-label="Race cockpit">
-          <div class="metric primary">
-            <span>Route-km</span>
-            <strong id="metricKm">--</strong>
-          </div>
-          <div class="metric">
-            <span>Ziel/RBO</span>
-            <strong id="metricRemaining">--</strong>
-          </div>
-          <div class="metric">
-            <span>Off-route</span>
-            <strong id="metricOffRoute">--</strong>
-          </div>
-          <div class="metric">
-            <span>GPS</span>
-            <strong id="metricGps">--</strong>
-          </div>
-        </section>
-
-        <section class="next-grid" aria-label="Next stops">
-          <button class="next-card" id="nextCritical" type="button"></button>
-          <button class="next-card" id="nextFood" type="button"></button>
-          <button class="next-card" id="nextFuel" type="button"></button>
-        </section>
-
-        <nav class="tabs" aria-label="Views">
-          <button class="tab active" data-tab="map" type="button">Karte</button>
-          <button class="tab" data-tab="stops" type="button">Stops</button>
-          <button class="tab" data-tab="gaps" type="button">Lücken</button>
-          <button class="tab" data-tab="offline" type="button">Offline</button>
-          <button class="tab" data-tab="status" type="button">Status</button>
-        </nav>
-
-        <section class="panel active" id="panel-map">
-          <div class="map-shell">
-            <div id="leafletMap" aria-label="Online basemap route map"></div>
-            <canvas id="routeCanvas" aria-label="Offline route map"></canvas>
-            <div class="map-actions">
-              <button id="gpsButton" class="control primary" type="button">GPS starten</button>
-              <button id="centerButton" class="control" type="button">Zentrieren</button>
-            </div>
-            <div id="mapHint" class="map-hint">Offline schematic basemap · PMTiles pending</div>
-          </div>
-          <article id="selectedPoi" class="detail empty">Tippe einen Stop an oder nutze die Demo-Positionen.</article>
-        </section>
-
-        <section class="panel" id="panel-stops">
-          <div class="filters" id="filters">
-            <button class="chip active" data-filter="critical" type="button">Critical</button>
-            <button class="chip" data-filter="supermarket" type="button">Food</button>
-            <button class="chip" data-filter="fuel" type="button">Tankstelle</button>
-            <button class="chip" data-filter="24h" type="button">24h</button>
-            <button class="chip" data-filter="open" type="button">Likely open</button>
-            <button class="chip" data-filter="uncertain" type="button">Quelle unsicher</button>
-          </div>
-          <input id="stopSearch" class="search" type="search" placeholder="Stop suchen" autocomplete="off" />
-          <div id="stopList" class="list"></div>
-        </section>
-
-        <section class="panel" id="panel-gaps">
-          <div id="gapList" class="list"></div>
-        </section>
-
-        <section class="panel" id="panel-offline">
-          <div class="offline-actions">
-            <button class="control primary" id="cacheCoreButton" type="button">Kern offline speichern</button>
-            <button class="control" id="checkOfflineButton" type="button">Offline prüfen</button>
-            <button class="control" id="downloadMapPackButton" type="button">Kartenpack laden</button>
-          </div>
-          <div id="offlineSummary" class="offline-summary"></div>
-          <div id="offlineStatusGrid" class="offline-grid"></div>
-        </section>
-
-        <section class="panel" id="panel-status">
-          <div class="status-grid">
-            <button class="control primary" id="installCheckButton" type="button">Offline-Check</button>
-            <select id="raceDaySelect" class="select" aria-label="Race day">
-              <option value="thu">Do 25.06</option>
-              <option value="fri">Fr 26.06</option>
-              <option value="sat">Sa 27.06</option>
-              <option value="sun">So 28.06</option>
-            </select>
-          </div>
-          <div id="demoButtons" class="demo-grid"></div>
-          <pre id="statusLog" class="status-log"></pre>
-        </section>
-      </main>
-    </div>
-
-    <script src="./vendor/leaflet/leaflet.js" defer></script>
-    <script src="./src/app.js" defer></script>
+    <p>Weiter zu <a href="../flensburg-rueckfahrt/">Raid Radar · Flensburg Rückfahrt</a>.</p>
   </body>
 </html>
