@@ -1,3 +1,29 @@
+const MANUAL_CACHE_NAME = "race-cockpit-manual-offline-v1";
+const OFFLINE_MAP_PACK_KEY = "offlineMapPackStatus";
+const LAST_OFFLINE_CHECK_KEY = "lastOfflineCheck";
+const CORE_OFFLINE_ASSETS = [
+  "./",
+  "./index.html",
+  "./manifest.webmanifest",
+  "./src/app.js",
+  "./src/styles.css",
+  "./vendor/leaflet/leaflet.css",
+  "./vendor/leaflet/leaflet.js",
+  "./vendor/leaflet/images/marker-icon.png",
+  "./vendor/leaflet/images/marker-icon-2x.png",
+  "./vendor/leaflet/images/marker-shadow.png",
+  "./data/route.json",
+  "./data/pois.json",
+  "./data/gaps.json",
+  "./data/segments.json",
+  "./data/app-meta.json",
+  "./assets/rider-marker.png",
+  "./assets/rider-marker@2x.png",
+  "./assets/icon-192.png",
+  "./assets/icon-512.png",
+  "./assets/apple-touch-icon.png",
+];
+
 const state = {
   route: null,
   pois: [],
@@ -16,9 +42,22 @@ const state = {
   visited: new Set(JSON.parse(localStorage.getItem("visited") || "[]")),
   markerImage: new Image(),
   leaflet: null,
+  offline: {
+    mapPack: loadMapPackStatus(),
+    lastCheck: localStorage.getItem(LAST_OFFLINE_CHECK_KEY) || "",
+    snapshot: null,
+  },
 };
 
 const els = {};
+
+function loadMapPackStatus() {
+  try {
+    return JSON.parse(localStorage.getItem(OFFLINE_MAP_PACK_KEY) || '{"status":"missing"}');
+  } catch {
+    return { status: "missing" };
+  }
+}
 
 const fallbackDemoPositions = [
   { label: "Start", km: 0.2 },
@@ -78,6 +117,11 @@ function cacheElements() {
     "stopSearch",
     "stopList",
     "gapList",
+    "cacheCoreButton",
+    "checkOfflineButton",
+    "downloadMapPackButton",
+    "offlineSummary",
+    "offlineStatusGrid",
     "installCheckButton",
     "raceDaySelect",
     "demoButtons",
@@ -116,7 +160,18 @@ function bindEvents() {
     state.search = els.stopSearch.value.trim().toLowerCase();
     renderStops();
   });
+  els.cacheCoreButton.addEventListener("click", cacheCoreAssets);
+  els.checkOfflineButton.addEventListener("click", () => checkOfflineReadiness());
+  els.downloadMapPackButton.addEventListener("click", downloadMapPack);
   els.installCheckButton.addEventListener("click", runOfflineCheck);
+  window.addEventListener("online", () => {
+    setBadge("Cached", "ready");
+    renderOfflinePanel();
+  });
+  window.addEventListener("offline", () => {
+    setBadge("Offline", "ready");
+    renderOfflinePanel();
+  });
   els.raceDaySelect.value = state.raceDay;
   els.raceDaySelect.addEventListener("change", () => {
     state.raceDay = els.raceDaySelect.value;
@@ -229,9 +284,11 @@ async function registerServiceWorker() {
     await navigator.serviceWorker.ready;
     setBadge(navigator.onLine ? "Cached" : "Offline", "ready");
     logStatus(`Service Worker ready: ${registration.scope}`);
+    checkOfflineReadiness({ quiet: true });
   } catch (error) {
     setBadge("SW fail", "warn");
     logStatus(`Service Worker error: ${error.message}`);
+    renderOfflinePanel();
   }
 }
 
@@ -370,6 +427,7 @@ function renderAll() {
   renderStops();
   renderGaps();
   renderStatus();
+  renderOfflinePanel();
   drawMap();
 }
 
@@ -569,24 +627,236 @@ function renderStatus() {
 }
 
 async function runOfflineCheck() {
-  const urls = [
-    "./index.html",
-    "./src/app.js",
-    "./src/styles.css",
-    "./data/route.json",
-    "./data/pois.json",
-    "./assets/rider-marker.png",
-  ];
-  const results = [];
+  const snapshot = await checkOfflineReadiness();
+  const missing = snapshot.core.missing.length ? `Missing: ${snapshot.core.missing.join(", ")}` : "Alle Kern-Dateien im Cache.";
+  logStatus(`Offline-Check: ${snapshot.core.cachedCount}/${snapshot.core.total} Kern-Dateien cached.\n${missing}`);
+  activateTab("offline");
+}
+
+async function cacheCoreAssets() {
+  if (!("caches" in window)) {
+    logStatus("Cache API ist in diesem Browser nicht verfügbar.");
+    renderOfflinePanel();
+    return;
+  }
+  els.cacheCoreButton.disabled = true;
+  els.cacheCoreButton.textContent = "Speichere...";
+  let ok = 0;
+  const failures = [];
+  try {
+    const cache = await caches.open(MANUAL_CACHE_NAME);
+    for (const url of CORE_OFFLINE_ASSETS) {
+      try {
+        const response = await fetch(url, { cache: "reload", credentials: "same-origin" });
+        if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+        await cache.put(url, response.clone());
+        ok += 1;
+      } catch (error) {
+        failures.push(`${url}: ${error.message}`);
+      }
+    }
+  } finally {
+    els.cacheCoreButton.disabled = false;
+    els.cacheCoreButton.textContent = "Kern offline speichern";
+  }
+  const snapshot = await checkOfflineReadiness({ quiet: true });
+  logStatus(
+    failures.length
+      ? `Kern-Cache: ${ok}/${CORE_OFFLINE_ASSETS.length} gespeichert.\n${failures.join("\n")}`
+      : `Kern-Cache: ${ok}/${CORE_OFFLINE_ASSETS.length} Dateien gespeichert.`,
+  );
+  state.offline.snapshot = snapshot;
+  renderOfflinePanel();
+}
+
+async function checkOfflineReadiness({ quiet = false } = {}) {
+  const checkedAt = new Date().toISOString();
+  const core = await checkCacheUrls(CORE_OFFLINE_ASSETS);
+  const storage = await storageEstimate();
+  const mapPack = normalizeMapPackStatus();
+  const serviceWorkerSupported = "serviceWorker" in navigator;
+  const snapshot = {
+    checkedAt,
+    online: navigator.onLine,
+    serviceWorker: {
+      supported: serviceWorkerSupported,
+      controlled: Boolean(navigator.serviceWorker?.controller),
+    },
+    core,
+    storage,
+    routeReady: core.cached.has("./data/route.json"),
+    poisReady: core.cached.has("./data/pois.json"),
+    markerReady: core.cached.has("./assets/rider-marker.png") && core.cached.has("./assets/rider-marker@2x.png"),
+    leafletReady: core.cached.has("./vendor/leaflet/leaflet.css") && core.cached.has("./vendor/leaflet/leaflet.js"),
+    mapPack,
+  };
+  state.offline.lastCheck = checkedAt;
+  state.offline.snapshot = snapshot;
+  localStorage.setItem(LAST_OFFLINE_CHECK_KEY, checkedAt);
+  renderOfflinePanel(snapshot);
+  if (!quiet) {
+    logStatus(`Offline bereit: ${snapshot.core.cachedCount}/${snapshot.core.total} Kern-Dateien cached.`);
+  }
+  return snapshot;
+}
+
+async function checkCacheUrls(urls) {
+  if (!("caches" in window)) {
+    return { total: urls.length, cachedCount: 0, cached: new Set(), missing: [...urls], unsupported: true };
+  }
+  const cached = new Set();
+  const missing = [];
   for (const url of urls) {
     try {
-      const cache = await caches.match(url);
-      results.push(`${cache ? "cached" : "missing"} ${url}`);
-    } catch (error) {
-      results.push(`cache API error ${url}: ${error.message}`);
+      const match = await caches.match(url, { ignoreSearch: true });
+      if (match) cached.add(url);
+      else missing.push(url);
+    } catch {
+      missing.push(url);
     }
   }
-  logStatus(results.join("\n"));
+  return { total: urls.length, cachedCount: cached.size, cached, missing, unsupported: false };
+}
+
+async function storageEstimate() {
+  if (!navigator.storage?.estimate) return { supported: false };
+  try {
+    const estimate = await navigator.storage.estimate();
+    return {
+      supported: true,
+      usage: estimate.usage || 0,
+      quota: estimate.quota || 0,
+    };
+  } catch {
+    return { supported: false };
+  }
+}
+
+function normalizeMapPackStatus() {
+  const configured = state.meta?.offline_map_pack || {};
+  if (!configured.url) {
+    return {
+      status: "missing",
+      label: configured.label || "Offline-Kartenpack",
+      note: configured.note || "PMTiles-Kartenpack ist noch nicht hinterlegt. Route, POIs und GPS funktionieren trotzdem offline.",
+    };
+  }
+  return {
+    status: state.offline.mapPack?.status || "available",
+    label: configured.label || "Offline-Kartenpack",
+    url: configured.url,
+    size: state.offline.mapPack?.size || configured.expected_size_mb || null,
+    note: state.offline.mapPack?.note || configured.note || "Kartenpack kann lokal gespeichert werden.",
+    updatedAt: state.offline.mapPack?.updatedAt || "",
+  };
+}
+
+async function downloadMapPack() {
+  const configured = state.meta?.offline_map_pack || {};
+  if (!configured.url) {
+    state.offline.mapPack = {
+      status: "missing",
+      updatedAt: new Date().toISOString(),
+      note: "PMTiles noch nicht hinterlegt. Für Hamburg bauen wir als nächsten Schritt ein Route-Korridor-Pack.",
+    };
+    localStorage.setItem(OFFLINE_MAP_PACK_KEY, JSON.stringify(state.offline.mapPack));
+    renderOfflinePanel();
+    logStatus("Kartenpack: PMTiles ist noch nicht hinterlegt. Kern-App bleibt offline nutzbar.");
+    return;
+  }
+  if (!("caches" in window)) {
+    logStatus("Kartenpack kann nicht gespeichert werden: Cache API fehlt.");
+    return;
+  }
+  els.downloadMapPackButton.disabled = true;
+  els.downloadMapPackButton.textContent = "Lade...";
+  try {
+    const response = await fetch(configured.url, { cache: "reload" });
+    if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+    const cache = await caches.open(MANUAL_CACHE_NAME);
+    await cache.put(configured.url, response.clone());
+    const length = response.headers.get("content-length");
+    state.offline.mapPack = {
+      status: "cached",
+      url: configured.url,
+      size: length ? Number(length) : configured.expected_size_mb || null,
+      updatedAt: new Date().toISOString(),
+      note: "PMTiles-Kartenpack ist im Browser-Cache gespeichert.",
+    };
+    localStorage.setItem(OFFLINE_MAP_PACK_KEY, JSON.stringify(state.offline.mapPack));
+    logStatus("Kartenpack gespeichert.");
+  } catch (error) {
+    state.offline.mapPack = {
+      status: "error",
+      url: configured.url,
+      updatedAt: new Date().toISOString(),
+      note: error.message,
+    };
+    localStorage.setItem(OFFLINE_MAP_PACK_KEY, JSON.stringify(state.offline.mapPack));
+    logStatus(`Kartenpack-Fehler: ${error.message}`);
+  } finally {
+    els.downloadMapPackButton.disabled = false;
+    els.downloadMapPackButton.textContent = "Kartenpack laden";
+    checkOfflineReadiness({ quiet: true });
+  }
+}
+
+function renderOfflinePanel(snapshot = state.offline.snapshot) {
+  if (!els.offlineSummary || !els.offlineStatusGrid) return;
+  const mapPack = normalizeMapPackStatus();
+  const core = snapshot?.core || { total: CORE_OFFLINE_ASSETS.length, cachedCount: 0, missing: CORE_OFFLINE_ASSETS, cached: new Set() };
+  const ready =
+    core.cachedCount === core.total &&
+    (snapshot?.routeReady ?? false) &&
+    (snapshot?.poisReady ?? false) &&
+    (snapshot?.markerReady ?? false) &&
+    (snapshot?.leafletReady ?? false);
+  els.offlineSummary.innerHTML = `<strong>${ready ? "Kern-App offline bereit" : "Offline-Kern noch prüfen"}</strong>
+    ${ready ? "App-Shell, Route, POIs, Marker und Leaflet sind gecached." : "Tippe zuerst auf Kern offline speichern, dann auf Offline prüfen."}
+    ${mapPack.status === "cached" ? " Kartenpack ist gespeichert." : " Vollständige Offline-Basemap folgt über PMTiles."}`;
+  const lastCheck = snapshot?.checkedAt || state.offline.lastCheck || "noch nicht geprüft";
+  const storage = snapshot?.storage;
+  const storageText =
+    storage?.supported && storage.quota
+      ? `${formatBytes(storage.usage)} genutzt von ${formatBytes(storage.quota)} verfügbar`
+      : "Storage-Schätzung in diesem Browser nicht verfügbar";
+  const cards = [
+    offlineCard("App Shell", core.cachedCount >= 6 ? "ready" : "warn", `${core.cachedCount}/${core.total} Kern-Dateien im Cache`),
+    offlineCard("Route", snapshot?.routeReady ? "ready" : "missing", snapshot?.routeReady ? `${state.route?.total_km?.toFixed(1) || "--"} km Route cached` : "route.json fehlt im Cache"),
+    offlineCard("POIs", snapshot?.poisReady ? "ready" : "missing", snapshot?.poisReady ? `${state.pois.length} Stops offline verfügbar` : "pois.json fehlt im Cache"),
+    offlineCard("Rider Marker", snapshot?.markerReady ? "ready" : "missing", snapshot?.markerReady ? "Foto-Marker cached" : "Marker-Bilder fehlen im Cache"),
+    offlineCard("Map Library", snapshot?.leafletReady ? "ready" : "missing", snapshot?.leafletReady ? "Leaflet lokal cached" : "Leaflet fehlt im Cache"),
+    offlineCard("Offline Map Pack", mapPack.status === "cached" ? "ready" : mapPack.status === "error" ? "missing" : "warn", mapPack.note),
+    offlineCard("Speicher", "ready", storageText),
+    offlineCard("Letzter Check", snapshot ? "ready" : "warn", formatCheckTime(lastCheck)),
+  ];
+  els.offlineStatusGrid.innerHTML = cards.join("");
+}
+
+function offlineCard(title, status, body) {
+  return `<article class="offline-card ${status}">
+    <h3>${escapeHtml(title)}</h3>
+    <p>${escapeHtml(body)}</p>
+  </article>`;
+}
+
+function formatCheckTime(value) {
+  if (!value || value === "noch nicht geprüft") return "noch nicht geprüft";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
+  return `${date.toLocaleDateString("de-DE")} ${date.toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit" })}`;
+}
+
+function formatBytes(bytes) {
+  if (!Number.isFinite(bytes) || bytes <= 0) return "0 MB";
+  const units = ["B", "KB", "MB", "GB"];
+  let value = bytes;
+  let unit = 0;
+  while (value >= 1024 && unit < units.length - 1) {
+    value /= 1024;
+    unit += 1;
+  }
+  return `${value.toFixed(unit <= 1 ? 0 : 1)} ${units[unit]}`;
 }
 
 function logStatus(message) {

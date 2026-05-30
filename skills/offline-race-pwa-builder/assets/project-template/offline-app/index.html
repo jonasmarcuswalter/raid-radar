@@ -54,6 +54,7 @@
           <button class="tab active" data-tab="map" type="button">Karte</button>
           <button class="tab" data-tab="stops" type="button">Stops</button>
           <button class="tab" data-tab="gaps" type="button">Lücken</button>
+          <button class="tab" data-tab="offline" type="button">Offline</button>
           <button class="tab" data-tab="status" type="button">Status</button>
         </nav>
 
@@ -85,6 +86,16 @@
 
         <section class="panel" id="panel-gaps">
           <div id="gapList" class="list"></div>
+        </section>
+
+        <section class="panel" id="panel-offline">
+          <div class="offline-actions">
+            <button class="control primary" id="cacheCoreButton" type="button">Kern offline speichern</button>
+            <button class="control" id="checkOfflineButton" type="button">Offline prüfen</button>
+            <button class="control" id="downloadMapPackButton" type="button">Kartenpack laden</button>
+          </div>
+          <div id="offlineSummary" class="offline-summary"></div>
+          <div id="offlineStatusGrid" class="offline-grid"></div>
         </section>
 
         <section class="panel" id="panel-status">

@@ -174,7 +174,7 @@ h1 {
 
 .tabs {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 6px;
   margin: 12px 0 10px;
 }
@@ -411,11 +411,76 @@ h1 {
 }
 
 .status-grid,
-.demo-grid {
+.demo-grid,
+.offline-actions {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   margin-bottom: 10px;
+}
+
+.offline-actions {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.offline-summary {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 10px;
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.offline-summary strong {
+  display: block;
+  color: var(--ink);
+  font-size: 17px;
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.offline-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.offline-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 11px;
+  background: var(--panel);
+}
+
+.offline-card h3 {
+  margin: 0 0 5px;
+  font-size: 15px;
+  line-height: 1.2;
+}
+
+.offline-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.offline-card.ready {
+  border-color: rgba(46, 107, 78, 0.24);
+  background: #f0f8f3;
+}
+
+.offline-card.warn {
+  border-color: rgba(208, 122, 45, 0.28);
+  background: #fff8ef;
+}
+
+.offline-card.missing {
+  border-color: rgba(166, 61, 45, 0.22);
+  background: #fff5f2;
 }
 
 .demo-grid {
@@ -453,6 +518,7 @@ a {
   }
 
   .detail-grid,
+  .offline-grid,
   .demo-grid {
     grid-template-columns: 1fr 1fr;
   }
@@ -483,7 +549,9 @@ a {
 
   .detail-grid,
   .status-grid,
-  .demo-grid {
+  .demo-grid,
+  .offline-actions,
+  .offline-grid {
     grid-template-columns: 1fr;
   }
 }

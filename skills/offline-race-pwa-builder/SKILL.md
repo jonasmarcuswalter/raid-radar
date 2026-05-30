@@ -57,6 +57,7 @@ The bundled `assets/project-template/` contains:
 - Vanilla static PWA in `offline-app/`
 - Leaflet online basemap for development and route inspection
 - Service worker caching for app shell, route JSON, POIs, marker, icons, and map libraries
+- In-app Offline tab with manual core caching, readiness checks, browser storage estimate, and PMTiles pack placeholder
 - GPX/POI generator scripts in `scripts/`
 - Rider photo marker assets
 - GitHub Pages preparation helper

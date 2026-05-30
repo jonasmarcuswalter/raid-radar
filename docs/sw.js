@@ -1,4 +1,4 @@
-const CACHE_NAME = "gpx-iphone-test-offline-v1-2026-05-30T134311z0000";
+const CACHE_NAME = "gpx-iphone-test-offline-v1-2026-05-30T170000z0000";
 const CACHE_PREFIX = "gpx-iphone-test-offline-v1-";
 const ASSETS = [
   "./",

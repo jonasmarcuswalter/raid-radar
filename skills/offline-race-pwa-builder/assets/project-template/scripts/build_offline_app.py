@@ -421,6 +421,19 @@ def build(args: argparse.Namespace) -> dict:
             },
         ),
         "offline_ready": "core-route-poi-schematic",
+        "offline_map_pack": config.get(
+            "offline_map_pack",
+            {
+                "status": "missing",
+                "label": "PMTiles Route-Korridor",
+                "url": "",
+                "expected_size_mb": None,
+                "note": (
+                    "PMTiles-Kartenpack ist noch nicht hinterlegt. Route, POIs, Marker und Cockpit "
+                    "funktionieren nach Kern-Cache trotzdem offline."
+                ),
+            },
+        ),
     }
 
     make_icons()
