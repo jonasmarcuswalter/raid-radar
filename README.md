@@ -1,12 +1,18 @@
 # Raid Radar
 
-Static offline Raid Radar PWA for GPX routes, next-raid decisions, route snapping, POIs, and iPhone/Safari service-worker behavior.
+Offline route apps for GPX rides, next-raid decisions, route snapping, POIs, and iPhone/Safari service-worker behavior.
 
-Brand claim: `Raid Before You Bonk`.
+Brand:
 
-## Published Apps
+- Product name: `Raid Radar`
+- Launcher claim: `Find the next raid before the bonk finds you`
+- Route-app claim: `Raid Before You Bonk`
 
-GitHub Pages is configured to publish from the `pages` branch, `/docs`.
+The GitHub repository slug is still `race-cockpit` so existing GitHub Pages links keep working. The public product and visible app branding are Raid Radar.
+
+## Public App
+
+GitHub Pages publishes from the `pages` branch, `/docs`.
 
 Launcher:
 
@@ -17,6 +23,22 @@ Route apps:
 - Zürich test: https://deinemuttersitztaufmeinemlenker.github.io/race-cockpit/zuerich-test/
 - Flensburg Rückfahrt: https://deinemuttersitztaufmeinemlenker.github.io/race-cockpit/flensburg-rueckfahrt/
 - Hamburg Backyard: https://deinemuttersitztaufmeinemlenker.github.io/race-cockpit/hamburg-backyard/
+
+## GPX Intake
+
+The launcher includes the first GPX intake step:
+
+- choose a `.gpx` file locally in the browser
+- validate that it is parseable and no longer than 1000 km
+- calculate route length and point count
+- copy a ready-to-send Codex prompt for creating the next Raid Radar app
+
+Current limitation: a static GitHub Pages page cannot push a file directly into this Codex chat by itself. The next automation step should be a small backend or GitHub Issue/Action flow:
+
+1. User uploads GPX on Raid Radar.
+2. Backend stores the GPX and opens a route-build request.
+3. Codex receives the request, builds the route app, researches POIs, runs subagent QA, and pushes a new `/docs/<route-slug>/` app.
+4. The launcher route list is updated.
 
 ## Current Builds
 

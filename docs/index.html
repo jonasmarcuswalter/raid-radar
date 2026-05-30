@@ -120,6 +120,131 @@
         line-height: 1.08;
       }
 
+      .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+        margin: 18px 0 20px;
+      }
+
+      .action {
+        display: inline-flex;
+        min-height: 48px;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        color: var(--ink);
+        font-weight: 900;
+        text-decoration: none;
+      }
+
+      .action.primary {
+        border-color: var(--accent);
+        background: var(--accent);
+        color: white;
+      }
+
+      .section {
+        padding: 18px 0 4px;
+      }
+
+      .section-title {
+        margin: 0 0 8px;
+        font-size: 22px;
+        line-height: 1.12;
+      }
+
+      .section-copy {
+        margin: 0 0 14px;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.45;
+      }
+
+      .intake-box {
+        display: grid;
+        gap: 10px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 14px;
+        background: var(--panel);
+      }
+
+      .upload-row {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .file-control,
+      button.control {
+        display: inline-flex;
+        min-height: 46px;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--accent);
+        border-radius: 8px;
+        padding: 0 14px;
+        background: var(--accent);
+        color: white;
+        font: inherit;
+        font-weight: 900;
+        cursor: pointer;
+      }
+
+      .file-control input {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      button.control.secondary {
+        border-color: var(--line);
+        background: #f7fbf8;
+        color: var(--ink);
+      }
+
+      button.control:disabled {
+        cursor: not-allowed;
+        opacity: 0.52;
+      }
+
+      .upload-status {
+        min-height: 54px;
+        border-radius: 8px;
+        padding: 12px;
+        background: #f7fbf8;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.4;
+      }
+
+      .upload-status strong {
+        display: block;
+        color: var(--ink);
+        font-size: 15px;
+        line-height: 1.25;
+      }
+
+      .upload-status.ok {
+        background: #edf7f0;
+        color: #315a42;
+      }
+
+      .upload-status.warn {
+        background: #fff6e9;
+        color: #7b4b18;
+      }
+
+      .upload-status.error {
+        background: #fff0ee;
+        color: #8a3027;
+      }
+
       .routes {
         display: grid;
         gap: 10px;
@@ -152,6 +277,13 @@
         font-size: 13px;
         line-height: 1.4;
       }
+
+      @media (max-width: 560px) {
+        .quick-actions,
+        .upload-row {
+          grid-template-columns: 1fr;
+        }
+      }
     </style>
   </head>
   <body>
@@ -163,7 +295,31 @@
           <p class="eyebrow">Find the next raid before the bonk finds you</p>
         </div>
       </div>
-      <h1>Route Apps</h1>
+
+      <div class="quick-actions" aria-label="Raid Radar actions">
+        <a class="action primary" href="#upload">Upload GPX</a>
+        <a class="action" href="#routes">Routes</a>
+      </div>
+
+      <section class="section" id="upload" aria-label="GPX upload">
+        <h1>Neue Route vorbereiten</h1>
+        <p class="section-copy">GPX bis 1000 km prüfen und als Codex-Auftrag vorbereiten. Der automatische Chat-Push ist der nächste Backend-Schritt; bis dahin bekommst du hier einen sauberen Auftrag zum Kopieren.</p>
+        <div class="intake-box">
+          <div class="upload-row">
+            <label class="file-control">
+              GPX auswählen
+              <input id="gpxUpload" type="file" accept=".gpx,application/gpx+xml" />
+            </label>
+            <button class="control secondary" id="copyPromptButton" type="button" disabled>Codex-Auftrag kopieren</button>
+          </div>
+          <div class="upload-status" id="uploadStatus">Noch keine GPX geladen.</div>
+        </div>
+      </section>
+
+      <section class="section" id="routes" aria-label="Raid Radar routes">
+        <h2 class="section-title">Routes</h2>
+      </section>
+
       <section class="routes" aria-label="Raid Radar apps">
         <a class="route" href="./zuerich-test/">
           <strong>Zürich-Test</strong>
@@ -182,6 +338,106 @@
     <script>
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker.getRegistration("./").then((registration) => registration?.unregister());
+      }
+
+      const MAX_GPX_KM = 1000;
+      const uploadInput = document.getElementById("gpxUpload");
+      const uploadStatus = document.getElementById("uploadStatus");
+      const copyPromptButton = document.getElementById("copyPromptButton");
+      let preparedPrompt = "";
+
+      uploadInput.addEventListener("change", async () => {
+        const file = uploadInput.files?.[0];
+        preparedPrompt = "";
+        copyPromptButton.disabled = true;
+        if (!file) {
+          setUploadStatus("Noch keine GPX geladen.");
+          return;
+        }
+        if (!file.name.toLowerCase().endsWith(".gpx")) {
+          setUploadStatus("<strong>Bitte eine GPX-Datei auswählen.</strong>Andere Formate nehme ich hier noch nicht an.", "error");
+          return;
+        }
+        try {
+          const text = await file.text();
+          const stats = parseGpxStats(text);
+          const distance = stats.km.toFixed(1);
+          if (stats.points < 2) {
+            setUploadStatus("<strong>GPX erkannt, aber zu wenig Punkte.</strong>Bitte prüfe, ob die Datei wirklich eine Track- oder Route-Linie enthält.", "error");
+            return;
+          }
+          if (stats.km > MAX_GPX_KM) {
+            setUploadStatus(`<strong>${file.name}</strong>${distance} km · ${stats.points.toLocaleString("de-DE")} Punkte. Aktuelles Limit: ${MAX_GPX_KM} km.`, "warn");
+            return;
+          }
+          preparedPrompt = buildCodexPrompt(file.name, stats);
+          copyPromptButton.disabled = false;
+          setUploadStatus(`<strong>${file.name}</strong>${distance} km · ${stats.points.toLocaleString("de-DE")} Punkte · bereit für Codex.`, "ok");
+        } catch (error) {
+          setUploadStatus(`<strong>GPX konnte nicht gelesen werden.</strong>${escapeHtml(error.message)}`, "error");
+        }
+      });
+
+      copyPromptButton.addEventListener("click", async () => {
+        if (!preparedPrompt) return;
+        await navigator.clipboard.writeText(preparedPrompt);
+        setUploadStatus(`${uploadStatus.innerHTML}<br>Codex-Auftrag kopiert. GPX jetzt in den Chat ziehen und Auftrag einfügen.`, "ok");
+      });
+
+      function parseGpxStats(text) {
+        const doc = new DOMParser().parseFromString(text, "application/xml");
+        const parserError = doc.querySelector("parsererror");
+        if (parserError) throw new Error("XML ist nicht parsebar.");
+        const pointNodes = [...doc.querySelectorAll("trkpt")];
+        const routeNodes = pointNodes.length ? pointNodes : [...doc.querySelectorAll("rtept")];
+        const points = routeNodes
+          .map((node) => ({
+            lat: Number(node.getAttribute("lat")),
+            lon: Number(node.getAttribute("lon")),
+          }))
+          .filter((point) => Number.isFinite(point.lat) && Number.isFinite(point.lon));
+        let meters = 0;
+        for (let index = 1; index < points.length; index += 1) {
+          meters += haversineMeters(points[index - 1], points[index]);
+        }
+        return { points: points.length, km: meters / 1000 };
+      }
+
+      function haversineMeters(a, b) {
+        const radius = 6371000;
+        const toRad = (value) => (value * Math.PI) / 180;
+        const dLat = toRad(b.lat - a.lat);
+        const dLon = toRad(b.lon - a.lon);
+        const lat1 = toRad(a.lat);
+        const lat2 = toRad(b.lat);
+        const h =
+          Math.sin(dLat / 2) ** 2 +
+          Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+        return 2 * radius * Math.asin(Math.sqrt(h));
+      }
+
+      function buildCodexPrompt(fileName, stats) {
+        return [
+          "Bitte erstelle eine neue Raid Radar Route-App für die angehängte GPX-Datei.",
+          `Datei: ${fileName}`,
+          `Validierung auf der Raid Radar Homepage: ${stats.km.toFixed(1)} km, ${stats.points.toLocaleString("de-DE")} Punkte, unter dem aktuellen 1000-km-Limit.`,
+          "Bitte Route, POIs, Next Raid, Offline-Kartenpack, Service Worker, GitHub Pages-Unterordner und Subagent-Audit wie bei Flensburg Rückfahrt/Hamburg Backyard erzeugen.",
+        ].join("\\n");
+      }
+
+      function setUploadStatus(html, mode = "") {
+        uploadStatus.className = `upload-status ${mode}`.trim();
+        uploadStatus.innerHTML = html;
+      }
+
+      function escapeHtml(value) {
+        return value.replace(/[&<>"']/g, (char) => ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#039;",
+        })[char]);
       }
     </script>
   </body>
