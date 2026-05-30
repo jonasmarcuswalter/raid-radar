@@ -18,6 +18,10 @@ Launcher:
 
 https://jonasmarcuswalter.github.io/raid-radar/
 
+Create-route onboarding:
+
+https://jonasmarcuswalter.github.io/raid-radar/create/
+
 Route apps:
 
 - Zürich test: https://jonasmarcuswalter.github.io/raid-radar/zuerich-test/
@@ -26,7 +30,7 @@ Route apps:
 
 ## ChatGPT App Direction
 
-GPX upload is intentionally not shown in the public launcher right now. The product stays focused on prepared route apps until the user-owned ChatGPT/Codex flow is ready enough to feel clean.
+GPX upload is intentionally not shown in the public launcher right now. The public `/create/` page is onboarding only; the actual GPX workflow will happen in ChatGPT through the `chatgpt-app/` scaffold when the connector flow is ready.
 
 The planned flow now lives in:
 

@@ -67,7 +67,7 @@
 
       .quick-actions {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 10px;
         margin: 18px 0 20px;
       }
@@ -114,7 +114,8 @@
       }
 
       a.route,
-      .about-panel {
+      .about-panel,
+      .create-panel {
         display: block;
         border: 1px solid var(--line);
         border-radius: 8px;
@@ -137,17 +138,20 @@
       }
 
       .route span,
-      .about-panel p {
+      .about-panel p,
+      .create-panel p {
         color: var(--muted);
         font-size: 13px;
         line-height: 1.45;
       }
 
-      .about-panel p {
+      .about-panel p,
+      .create-panel p {
         margin: 0;
       }
 
-      .about-panel p + p {
+      .about-panel p + p,
+      .create-panel p + p {
         margin-top: 10px;
       }
 
@@ -160,6 +164,20 @@
         color: #82480f;
         font-size: 12px;
         font-weight: 900;
+      }
+
+      .create-panel {
+        background: #fdf7ef;
+        border-color: #efd6b9;
+      }
+
+      .create-panel .section-title {
+        color: var(--accent);
+      }
+
+      .create-panel .action {
+        margin-top: 14px;
+        width: min(100%, 340px);
       }
 
       @media (max-width: 560px) {
@@ -181,6 +199,7 @@
 
       <div class="quick-actions" aria-label="Raid Radar navigation">
         <a class="action primary" href="#routes">Routes</a>
+        <a class="action" href="/raid-radar/create/">Create Route</a>
         <a class="action" href="#about">About</a>
       </div>
 
@@ -201,6 +220,16 @@
             <span>Ultra-Pair-Route mit Hamburg-Daten als eigener App-Bereich.</span>
           </a>
         </div>
+      </section>
+
+      <section class="section" id="create" aria-label="Create your own Raid Radar route">
+        <article class="create-panel">
+          <span class="about-kicker">Private beta</span>
+          <h2 class="section-title">Wanna create your own raid route?</h2>
+          <p class="section-copy">Bring a GPX. Pick your raid intelligence. Get an offline route app built for the next bonk emergency.</p>
+          <p>The self-serve flow will not run as a public GPX upload on this page. It will live inside ChatGPT with a private repo, the rider’s own OpenAI/Codex resource, and a clear choice for how deep the raid research should go.</p>
+          <a class="action primary" href="/raid-radar/create/">See how it works</a>
+        </article>
       </section>
 
       <section class="section" id="about" aria-label="About Raid Radar">

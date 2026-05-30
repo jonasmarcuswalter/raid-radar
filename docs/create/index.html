@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#15392c" />
+    <title>Create Route · Raid Radar</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f5f8f6;
+        --panel: #ffffff;
+        --ink: #14231d;
+        --muted: #607168;
+        --line: #d8e2dc;
+        --accent: #2e6b4e;
+        --accent-2: #d07a2d;
+        --soft: #fdf7ef;
+        --soft-line: #efd6b9;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        min-height: 100vh;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      }
+
+      main {
+        width: min(900px, calc(100% - 28px));
+        margin: 0 auto;
+        padding: max(18px, env(safe-area-inset-top)) 0 max(28px, env(safe-area-inset-bottom));
+      }
+
+      .brand-lockup {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 18px;
+      }
+
+      .raid-logo {
+        flex: 0 0 auto;
+        width: 68px;
+        height: 68px;
+        filter: drop-shadow(0 10px 18px rgba(25, 47, 37, 0.15));
+      }
+
+      .brand-name {
+        margin: 0;
+        color: var(--accent);
+        font-size: clamp(30px, 8vw, 54px);
+        font-weight: 950;
+        line-height: 0.95;
+      }
+
+      .eyebrow {
+        margin: 5px 0 0;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0;
+      }
+
+      .back-link,
+      .action {
+        display: inline-flex;
+        min-height: 44px;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        color: var(--ink);
+        font-weight: 900;
+        text-decoration: none;
+      }
+
+      .back-link {
+        padding: 0 14px;
+        margin-bottom: 16px;
+      }
+
+      .action {
+        padding: 0 16px;
+        border-color: var(--accent);
+        background: var(--accent);
+        color: white;
+      }
+
+      .hero {
+        padding: 24px 0 18px;
+      }
+
+      .hero-kicker,
+      .status-kicker {
+        display: inline-flex;
+        margin-bottom: 10px;
+        border-radius: 999px;
+        padding: 5px 9px;
+        background: #fff5e8;
+        color: #82480f;
+        font-size: 12px;
+        font-weight: 900;
+      }
+
+      h1 {
+        margin: 0;
+        max-width: 760px;
+        color: var(--accent);
+        font-size: clamp(34px, 9vw, 68px);
+        line-height: 0.95;
+        letter-spacing: 0;
+      }
+
+      .subclaim {
+        margin: 12px 0 0;
+        max-width: 680px;
+        color: var(--ink);
+        font-size: clamp(18px, 4.5vw, 28px);
+        font-weight: 900;
+        line-height: 1.1;
+      }
+
+      .hero-copy {
+        margin: 12px 0 0;
+        max-width: 700px;
+        color: var(--muted);
+        font-size: 15px;
+        line-height: 1.55;
+      }
+
+      .sections {
+        display: grid;
+        gap: 12px;
+        margin-top: 10px;
+      }
+
+      .panel {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 16px;
+        background: var(--panel);
+      }
+
+      .panel.highlight {
+        border-color: var(--soft-line);
+        background: var(--soft);
+      }
+
+      .panel h2 {
+        margin: 0 0 10px;
+        color: var(--accent);
+        font-size: 24px;
+        line-height: 1.1;
+      }
+
+      .panel p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      .panel p + p {
+        margin-top: 10px;
+      }
+
+      .steps,
+      .need-list,
+      .profiles {
+        display: grid;
+        gap: 10px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+
+      .step,
+      .need,
+      .profile {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 12px;
+        background: #fbfdfc;
+      }
+
+      .step strong,
+      .need strong,
+      .profile strong {
+        display: block;
+        margin-bottom: 4px;
+        color: var(--ink);
+        font-size: 15px;
+      }
+
+      .step span,
+      .need span,
+      .profile span {
+        display: block;
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.4;
+      }
+
+      .profiles {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .status-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        margin-top: 14px;
+      }
+
+      @media (max-width: 700px) {
+        .profiles {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <div class="brand-lockup" aria-label="Raid Radar">
+        <img class="raid-logo" src="../assets/raid-radar-logo.svg" alt="" width="68" height="68" aria-hidden="true" />
+        <div>
+          <p class="brand-name">Raid Radar</p>
+          <p class="eyebrow">Find the next raid before the bonk finds you</p>
+        </div>
+      </div>
+
+      <a class="back-link" href="/raid-radar/">Back to routes</a>
+
+      <section class="hero" aria-labelledby="create-title">
+        <span class="hero-kicker">Private beta</span>
+        <h1 id="create-title">Wanna create your own raid route?</h1>
+        <p class="subclaim">Raid Before You Bonk, now for your own GPX.</p>
+        <p class="hero-copy">Custom Raid Radar routes will be built through ChatGPT, not through a public upload form. That keeps private GPX data private and lets every rider choose how much intelligence they want to spend on the route.</p>
+      </section>
+
+      <div class="sections">
+        <section class="panel highlight" aria-labelledby="status-title">
+          <span class="status-kicker">Current status</span>
+          <h2 id="status-title">Private beta / connector setup in progress</h2>
+          <p>The self-serve builder is being prepared as an embedded ChatGPT App. Until that connector is live, this page explains the flow and keeps the public site honest: no broken upload button, no pretend automation.</p>
+        </section>
+
+        <section class="panel" aria-labelledby="how-title">
+          <h2 id="how-title">How it works</h2>
+          <ol class="steps">
+            <li class="step">
+              <strong>1. Once live, attach GPX in ChatGPT</strong>
+              <span>The embedded Raid Radar builder checks that the file is parseable and stays within the current 1000 km limit.</span>
+            </li>
+            <li class="step">
+              <strong>2. Choose the build</strong>
+              <span>Pick route name, privacy, target repo, and how deep the raid research should go.</span>
+            </li>
+            <li class="step">
+              <strong>3. Build the route app</strong>
+              <span>Codex prepares the offline route cockpit with GPX line, Next Raid, raid options, gaps, and map-pack logic where feasible.</span>
+            </li>
+          </ol>
+        </section>
+
+        <section class="panel" aria-labelledby="need-title">
+          <h2 id="need-title">What you need</h2>
+          <ul class="need-list">
+            <li class="need">
+              <strong>A GPX file</strong>
+              <span>Up to 1000 km for now, with enough track points to build a useful route.</span>
+            </li>
+            <li class="need">
+              <strong>A ChatGPT / OpenAI account</strong>
+              <span>The route intelligence runs from the rider’s own account or connected Codex environment.</span>
+            </li>
+            <li class="need">
+              <strong>A GitHub account</strong>
+              <span>Private route requests should live in a rider-owned repo, not in the public Raid Radar demo repo.</span>
+            </li>
+          </ul>
+        </section>
+
+        <section class="panel highlight" aria-labelledby="privacy-title">
+          <h2 id="privacy-title">Your data stays yours</h2>
+          <p>Your GPX should not land in Jonas’s public Raid Radar repository. The planned builder stores private route requests in your own repository or private build storage.</p>
+          <p>OpenAI/Codex usage also belongs to the rider creating the route. Raid Radar provides the template, brand, and build flow; the private route intelligence runs on the user-owned resource.</p>
+        </section>
+
+        <section class="panel" aria-labelledby="intelligence-title">
+          <h2 id="intelligence-title">Choose raid intelligence</h2>
+          <div class="profiles">
+            <div class="profile">
+              <strong>Fast</strong>
+              <span>A quick raid scan for simple rides and lower effort.</span>
+            </div>
+            <div class="profile">
+              <strong>Balanced</strong>
+              <span>The default: useful stops, gaps, and source checks without going wild.</span>
+            </div>
+            <div class="profile">
+              <strong>Deep</strong>
+              <span>More research for tricky timing, Sundays, night riding, and fallback stops.</span>
+            </div>
+            <div class="profile">
+              <strong>Ultra</strong>
+              <span>Maximum paranoia mode for long routes where bad resupply decisions hurt.</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="panel" aria-labelledby="embed-title">
+          <h2 id="embed-title">How it embeds</h2>
+          <p>The builder appears inside ChatGPT as an embedded Apps SDK / MCP interface. You choose the GPX and settings there, ChatGPT can call the Raid Radar tools, and the resulting route request is prepared for your own private build target.</p>
+          <p>The public website stays the finished-route launcher: it shows prepared route apps, but it does not ask for private GPX files or credentials.</p>
+          <div class="status-row">
+            <a class="action" href="/raid-radar/">Explore current routes</a>
+          </div>
+        </section>
+      </div>
+    </main>
+  </body>
+</html>
