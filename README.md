@@ -8,7 +8,7 @@ Brand:
 - Launcher claim: `Find the next raid before the bonk finds you`
 - Route-app claim: `Raid Before You Bonk`
 
-The GitHub repository slug is still `race-cockpit`; the public product and visible app branding are Raid Radar.
+The GitHub repository slug is `raid-radar`; the public product and visible app branding are Raid Radar.
 
 ## Public App
 
@@ -16,13 +16,13 @@ GitHub Pages publishes from the `pages` branch, `/docs`.
 
 Launcher:
 
-https://jonasmarcuswalter.github.io/race-cockpit/
+https://jonasmarcuswalter.github.io/raid-radar/
 
 Route apps:
 
-- Zürich test: https://jonasmarcuswalter.github.io/race-cockpit/zuerich-test/
-- Flensburg Rückfahrt: https://jonasmarcuswalter.github.io/race-cockpit/flensburg-rueckfahrt/
-- Hamburg Backyard: https://jonasmarcuswalter.github.io/race-cockpit/hamburg-backyard/
+- Zürich test: https://jonasmarcuswalter.github.io/raid-radar/zuerich-test/
+- Flensburg Rückfahrt: https://jonasmarcuswalter.github.io/raid-radar/flensburg-rueckfahrt/
+- Hamburg Backyard: https://jonasmarcuswalter.github.io/raid-radar/hamburg-backyard/
 
 ## Parked GPX Intake
 
@@ -55,7 +55,7 @@ Configure and deploy it with:
 
 - `GITHUB_TOKEN`: fine-grained token with contents write + issues write
 - `GITHUB_OWNER`: `jonasmarcuswalter`
-- `GITHUB_REPO`: `race-cockpit`
+- `GITHUB_REPO`: `raid-radar`
 - `GITHUB_BRANCH`: `pages`
 - `PUBLIC_ORIGIN`: `https://jonasmarcuswalter.github.io`
 

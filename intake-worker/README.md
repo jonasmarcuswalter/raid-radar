@@ -17,7 +17,7 @@ Why this exists: GitHub Pages is static and cannot safely hold a GitHub token. T
 
 - `GITHUB_TOKEN`: fine-grained token with contents write + issues write for this repo.
 - `GITHUB_OWNER`: defaults to `jonasmarcuswalter`.
-- `GITHUB_REPO`: defaults to `race-cockpit`.
+- `GITHUB_REPO`: defaults to `raid-radar`.
 - `GITHUB_BRANCH`: defaults to `pages`.
 - `PUBLIC_ORIGIN`: defaults to `https://jonasmarcuswalter.github.io`.
 

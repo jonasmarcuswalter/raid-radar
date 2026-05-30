@@ -4,6 +4,6 @@ compatibility_date = "2026-05-30"
 
 [vars]
 GITHUB_OWNER = "jonasmarcuswalter"
-GITHUB_REPO = "race-cockpit"
+GITHUB_REPO = "raid-radar"
 GITHUB_BRANCH = "pages"
 PUBLIC_ORIGIN = "https://jonasmarcuswalter.github.io"

@@ -1,6 +1,6 @@
 const MAX_GPX_KM = 1000;
 const DEFAULT_OWNER = "jonasmarcuswalter";
-const DEFAULT_REPO = "race-cockpit";
+const DEFAULT_REPO = "raid-radar";
 const DEFAULT_BRANCH = "pages";
 const DEFAULT_ORIGIN = "https://jonasmarcuswalter.github.io";
 
