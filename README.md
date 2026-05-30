@@ -18,7 +18,7 @@ Launcher:
 
 https://jonasmarcuswalter.github.io/raid-radar/
 
-Create-route onboarding:
+Create-route builder:
 
 https://jonasmarcuswalter.github.io/raid-radar/create/
 
@@ -30,7 +30,7 @@ Route apps:
 
 ## ChatGPT App Direction
 
-GPX upload is intentionally not shown in the public launcher right now. The public `/create/` page is onboarding only; the actual GPX workflow will happen in ChatGPT through the `chatgpt-app/` scaffold when the connector flow is ready.
+The public `/create/` page is a local-first builder: it validates a GPX in the browser, previews the route, lets the rider choose an intelligence profile, and downloads a route-request ZIP/prompt. It does not upload GPX data, store credentials, or write to GitHub. The fully automated GPX workflow will happen later in ChatGPT through the `chatgpt-app/` scaffold when the connector flow is ready.
 
 The planned flow now lives in:
 

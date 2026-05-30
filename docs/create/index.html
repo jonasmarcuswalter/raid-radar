@@ -14,9 +14,12 @@
         --muted: #607168;
         --line: #d8e2dc;
         --accent: #2e6b4e;
+        --accent-dark: #214f39;
         --accent-2: #d07a2d;
         --soft: #fdf7ef;
         --soft-line: #efd6b9;
+        --danger: #a33a27;
+        --ok: #2e6b4e;
       }
 
       * {
@@ -32,7 +35,7 @@
       }
 
       main {
-        width: min(900px, calc(100% - 28px));
+        width: min(980px, calc(100% - 28px));
         margin: 0 auto;
         padding: max(18px, env(safe-area-inset-top)) 0 max(28px, env(safe-area-inset-bottom));
       }
@@ -67,8 +70,18 @@
         letter-spacing: 0;
       }
 
+      .top-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 18px;
+      }
+
       .back-link,
-      .action {
+      .action,
+      button {
         display: inline-flex;
         min-height: 44px;
         align-items: center;
@@ -77,24 +90,32 @@
         border-radius: 8px;
         background: var(--panel);
         color: var(--ink);
+        font: inherit;
         font-weight: 900;
         text-decoration: none;
+        cursor: pointer;
       }
 
-      .back-link {
+      .back-link,
+      .action,
+      button {
         padding: 0 14px;
-        margin-bottom: 16px;
       }
 
-      .action {
-        padding: 0 16px;
+      button.primary,
+      .action.primary {
         border-color: var(--accent);
         background: var(--accent);
         color: white;
       }
 
+      button:disabled {
+        cursor: not-allowed;
+        opacity: 0.48;
+      }
+
       .hero {
-        padding: 24px 0 18px;
+        padding: 8px 0 18px;
       }
 
       .hero-kicker,
@@ -111,7 +132,7 @@
 
       h1 {
         margin: 0;
-        max-width: 760px;
+        max-width: 820px;
         color: var(--accent);
         font-size: clamp(34px, 9vw, 68px);
         line-height: 0.95;
@@ -120,25 +141,26 @@
 
       .subclaim {
         margin: 12px 0 0;
-        max-width: 680px;
+        max-width: 760px;
         color: var(--ink);
         font-size: clamp(18px, 4.5vw, 28px);
         font-weight: 900;
         line-height: 1.1;
       }
 
-      .hero-copy {
-        margin: 12px 0 0;
-        max-width: 700px;
+      .hero-copy,
+      .panel p,
+      .field-help,
+      .stat span,
+      .result-list span {
         color: var(--muted);
-        font-size: 15px;
-        line-height: 1.55;
+        font-size: 14px;
+        line-height: 1.5;
       }
 
-      .sections {
-        display: grid;
-        gap: 12px;
-        margin-top: 10px;
+      .hero-copy {
+        margin: 12px 0 0;
+        max-width: 760px;
       }
 
       .panel {
@@ -153,6 +175,10 @@
         background: var(--soft);
       }
 
+      .panel + .panel {
+        margin-top: 12px;
+      }
+
       .panel h2 {
         margin: 0 0 10px;
         color: var(--accent);
@@ -162,18 +188,135 @@
 
       .panel p {
         margin: 0;
-        color: var(--muted);
-        font-size: 14px;
-        line-height: 1.5;
       }
 
-      .panel p + p {
-        margin-top: 10px;
+      .builder-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.05fr) minmax(300px, 0.95fr);
+        gap: 14px;
+        align-items: start;
       }
 
-      .steps,
-      .need-list,
-      .profiles {
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+      }
+
+      label {
+        display: grid;
+        gap: 6px;
+        color: var(--ink);
+        font-size: 13px;
+        font-weight: 850;
+      }
+
+      input,
+      select,
+      textarea {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fbfdfc;
+        color: var(--ink);
+        padding: 11px 12px;
+        font: inherit;
+      }
+
+      input[type="file"] {
+        min-height: 46px;
+      }
+
+      textarea {
+        min-height: 88px;
+        resize: vertical;
+      }
+
+      .wide {
+        grid-column: 1 / -1;
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+      }
+
+      .notice {
+        display: grid;
+        gap: 4px;
+        margin-top: 12px;
+        border: 1px solid var(--soft-line);
+        border-radius: 8px;
+        padding: 11px 12px;
+        background: var(--soft);
+        color: #704314;
+        font-size: 13px;
+        line-height: 1.4;
+      }
+
+      .notice strong {
+        color: #704314;
+      }
+
+      .stats {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+      }
+
+      .stat {
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 11px 12px;
+        background: #fbfdfc;
+      }
+
+      .stat strong {
+        display: block;
+        color: var(--accent-dark);
+        font-size: 22px;
+        line-height: 1.05;
+      }
+
+      .stat span {
+        display: block;
+        margin-top: 4px;
+        font-size: 12px;
+      }
+
+      .preview {
+        margin-top: 12px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+        background: #eef5f0;
+      }
+
+      svg {
+        display: block;
+        width: 100%;
+        min-height: 220px;
+      }
+
+      .message {
+        margin-top: 12px;
+        border-radius: 8px;
+        padding: 11px 12px;
+        background: #eef7f1;
+        color: var(--ok);
+        font-size: 13px;
+        font-weight: 800;
+        line-height: 1.4;
+      }
+
+      .message.error {
+        background: #fff0ec;
+        color: var(--danger);
+      }
+
+      .result-list {
         display: grid;
         gap: 10px;
         margin: 0;
@@ -181,47 +324,45 @@
         list-style: none;
       }
 
-      .step,
-      .need,
-      .profile {
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        padding: 12px;
-        background: #fbfdfc;
+      .result-list li {
+        border-top: 1px solid var(--line);
+        padding-top: 10px;
       }
 
-      .step strong,
-      .need strong,
-      .profile strong {
+      .result-list li:first-child {
+        border-top: 0;
+        padding-top: 0;
+      }
+
+      .result-list strong {
         display: block;
-        margin-bottom: 4px;
         color: var(--ink);
         font-size: 15px;
       }
 
-      .step span,
-      .need span,
-      .profile span {
-        display: block;
-        color: var(--muted);
-        font-size: 13px;
-        line-height: 1.4;
+      .codebox {
+        width: 100%;
+        min-height: 190px;
+        margin-top: 10px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 10px;
+        background: #101a17;
+        color: #dff6e8;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+        font-size: 12px;
+        line-height: 1.45;
+        white-space: pre-wrap;
+        overflow: auto;
       }
 
-      .profiles {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+      .hidden {
+        display: none;
       }
 
-      .status-row {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        align-items: center;
-        margin-top: 14px;
-      }
-
-      @media (max-width: 700px) {
-        .profiles {
+      @media (max-width: 840px) {
+        .builder-grid,
+        .form-grid {
           grid-template-columns: 1fr;
         }
       }
@@ -237,95 +378,604 @@
         </div>
       </div>
 
-      <a class="back-link" href="/raid-radar/">Back to routes</a>
+      <div class="top-row">
+        <a class="back-link" href="/raid-radar/">Back to routes</a>
+        <a class="action" href="https://chatgpt.com/" rel="noopener">Open ChatGPT</a>
+      </div>
 
       <section class="hero" aria-labelledby="create-title">
-        <span class="hero-kicker">Private beta</span>
+        <span class="hero-kicker">Working local MVP</span>
         <h1 id="create-title">Wanna create your own raid route?</h1>
         <p class="subclaim">Raid Before You Bonk, now for your own GPX.</p>
-        <p class="hero-copy">Custom Raid Radar routes will be built through ChatGPT, not through a public upload form. That keeps private GPX data private and lets every rider choose how much intelligence they want to spend on the route.</p>
+        <p class="hero-copy">This page now does the first useful part for real: validate a GPX locally, preview the route, choose raid intelligence, and download a route-request package for ChatGPT/Codex. Nothing is uploaded from this page.</p>
       </section>
 
-      <div class="sections">
-        <section class="panel highlight" aria-labelledby="status-title">
-          <span class="status-kicker">Current status</span>
-          <h2 id="status-title">Private beta / connector setup in progress</h2>
-          <p>The self-serve builder is being prepared as an embedded ChatGPT App. Until that connector is live, this page explains the flow and keeps the public site honest: no broken upload button, no pretend automation.</p>
-        </section>
+      <section class="panel highlight" aria-labelledby="builder-title">
+        <h2 id="builder-title">Create a route request</h2>
+        <div class="builder-grid">
+          <div>
+            <div class="form-grid">
+              <label class="wide">
+                GPX file
+                <input id="gpxFile" type="file" accept=".gpx,application/gpx+xml,text/xml,application/xml" />
+                <span class="field-help">Local-only check. The file stays in this browser unless you download and share the package yourself.</span>
+              </label>
 
-        <section class="panel" aria-labelledby="how-title">
-          <h2 id="how-title">How it works</h2>
-          <ol class="steps">
-            <li class="step">
-              <strong>1. Once live, attach GPX in ChatGPT</strong>
-              <span>The embedded Raid Radar builder checks that the file is parseable and stays within the current 1000 km limit.</span>
-            </li>
-            <li class="step">
-              <strong>2. Choose the build</strong>
-              <span>Pick route name, privacy, target repo, and how deep the raid research should go.</span>
-            </li>
-            <li class="step">
-              <strong>3. Build the route app</strong>
-              <span>Codex prepares the offline route cockpit with GPX line, Next Raid, raid options, gaps, and map-pack logic where feasible.</span>
-            </li>
-          </ol>
-        </section>
+              <label>
+                Route name
+                <input id="routeName" type="text" placeholder="Sunday Raid" autocomplete="off" />
+              </label>
 
-        <section class="panel" aria-labelledby="need-title">
-          <h2 id="need-title">What you need</h2>
-          <ul class="need-list">
-            <li class="need">
-              <strong>A GPX file</strong>
-              <span>Up to 1000 km for now, with enough track points to build a useful route.</span>
-            </li>
-            <li class="need">
-              <strong>A ChatGPT / OpenAI account</strong>
-              <span>The route intelligence runs from the rider’s own account or connected Codex environment.</span>
-            </li>
-            <li class="need">
-              <strong>A GitHub account</strong>
-              <span>Private route requests should live in a rider-owned repo, not in the public Raid Radar demo repo.</span>
-            </li>
-          </ul>
-        </section>
+              <label>
+                Visibility
+                <select id="visibility">
+                  <option value="private">Private route</option>
+                  <option value="unlisted">Unlisted share link</option>
+                  <option value="public">Public route</option>
+                </select>
+              </label>
 
-        <section class="panel highlight" aria-labelledby="privacy-title">
-          <h2 id="privacy-title">Your data stays yours</h2>
-          <p>Your GPX should not land in Jonas’s public Raid Radar repository. The planned builder stores private route requests in your own repository or private build storage.</p>
-          <p>OpenAI/Codex usage also belongs to the rider creating the route. Raid Radar provides the template, brand, and build flow; the private route intelligence runs on the user-owned resource.</p>
-        </section>
+              <label>
+                Raid intelligence
+                <select id="intelligence">
+                  <option value="balanced">Balanced</option>
+                  <option value="fast">Fast</option>
+                  <option value="deep">Deep</option>
+                  <option value="ultra">Ultra</option>
+                </select>
+              </label>
 
-        <section class="panel" aria-labelledby="intelligence-title">
-          <h2 id="intelligence-title">Choose raid intelligence</h2>
-          <div class="profiles">
-            <div class="profile">
-              <strong>Fast</strong>
-              <span>A quick raid scan for simple rides and lower effort.</span>
+              <label>
+                User repo
+                <input id="targetRepo" type="text" placeholder="github-user/raid-radar-routes" autocomplete="off" />
+              </label>
+
+              <label class="wide">
+                Notes for Codex
+                <textarea id="notes" placeholder="Ride date, start time, Sunday logic, food preferences, no-go stops, target finish, anything weird..."></textarea>
+              </label>
             </div>
-            <div class="profile">
-              <strong>Balanced</strong>
-              <span>The default: useful stops, gaps, and source checks without going wild.</span>
+
+            <div class="actions">
+              <button id="validateButton" class="primary" type="button">Check GPX</button>
+              <button id="downloadButton" type="button" disabled>Download request ZIP</button>
+              <button id="copyButton" type="button" disabled>Copy Codex prompt</button>
             </div>
-            <div class="profile">
-              <strong>Deep</strong>
-              <span>More research for tricky timing, Sundays, night riding, and fallback stops.</span>
+
+            <div class="notice" role="note">
+              <strong>Privacy model</strong>
+              <span>No network call, no API key, no GitHub token. This creates a handoff package that the rider can give to their own ChatGPT/Codex setup.</span>
             </div>
-            <div class="profile">
-              <strong>Ultra</strong>
-              <span>Maximum paranoia mode for long routes where bad resupply decisions hurt.</span>
+
+            <div id="message" class="message hidden" role="status"></div>
+          </div>
+
+          <div>
+            <div class="stats" aria-label="GPX stats">
+              <div class="stat">
+                <strong id="distanceValue">-</strong>
+                <span>distance</span>
+              </div>
+              <div class="stat">
+                <strong id="pointsValue">-</strong>
+                <span>track points</span>
+              </div>
+              <div class="stat">
+                <strong id="startValue">-</strong>
+                <span>start</span>
+              </div>
+              <div class="stat">
+                <strong id="finishValue">-</strong>
+                <span>finish</span>
+              </div>
+            </div>
+
+            <div class="preview" aria-label="Route preview">
+              <svg id="routePreview" viewBox="0 0 640 260" role="img" aria-label="GPX route preview">
+                <rect width="640" height="260" fill="#eef5f0"></rect>
+                <text x="320" y="132" text-anchor="middle" fill="#607168" font-size="18" font-weight="800">GPX preview appears here</text>
+              </svg>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section class="panel" aria-labelledby="embed-title">
-          <h2 id="embed-title">How it embeds</h2>
-          <p>The builder appears inside ChatGPT as an embedded Apps SDK / MCP interface. You choose the GPX and settings there, ChatGPT can call the Raid Radar tools, and the resulting route request is prepared for your own private build target.</p>
-          <p>The public website stays the finished-route launcher: it shows prepared route apps, but it does not ask for private GPX files or credentials.</p>
-          <div class="status-row">
-            <a class="action" href="/raid-radar/">Explore current routes</a>
-          </div>
-        </section>
-      </div>
+      <section id="resultPanel" class="panel hidden" aria-labelledby="result-title">
+        <h2 id="result-title">Route request ready</h2>
+        <ul class="result-list">
+          <li>
+            <strong>What the ZIP contains</strong>
+            <span><code>route.gpx</code>, <code>request.json</code>, <code>BUILD_PROMPT.md</code>, and <code>README.txt</code>.</span>
+          </li>
+          <li>
+            <strong>What to do next</strong>
+            <span>Open ChatGPT/Codex with your own account, attach the ZIP or its files, paste the prompt, and ask it to build the Raid Radar route app from the public template.</span>
+          </li>
+          <li>
+            <strong>What this does not do yet</strong>
+            <span>It does not automatically deploy to GitHub Pages. That needs the authenticated Connector/GitHub-App flow next.</span>
+          </li>
+        </ul>
+        <div id="promptPreview" class="codebox" aria-label="Codex prompt preview"></div>
+      </section>
+
+      <section class="panel" aria-labelledby="flow-title">
+        <h2 id="flow-title">How this becomes a full route app</h2>
+        <p>The downloadable package uses the same request shape as the future ChatGPT App: GPX, route metadata, selected intelligence level, privacy choice, and a Codex build prompt.</p>
+        <p>The next production step is an authenticated connector that writes this package into the rider’s private repo and launches the build there. Until then, this local builder is the safe working handoff.</p>
+      </section>
     </main>
+
+    <script>
+      const MAX_GPX_KM = 1000;
+      const ROUTE_TEMPLATE_REPO = "jonasmarcuswalter/raid-radar";
+      const profiles = {
+        fast: {
+          label: "Fast",
+          reasoningEffort: "low",
+          description: "Quick raid scan, sparse stops, critical-only source checks.",
+        },
+        balanced: {
+          label: "Balanced",
+          reasoningEffort: "medium",
+          description: "Recommended default: route-first POIs, useful gaps, and source checks for best stops.",
+        },
+        deep: {
+          label: "Deep",
+          reasoningEffort: "high",
+          description: "Broader source checks, better Sunday/night logic, and richer backups.",
+        },
+        ultra: {
+          label: "Ultra",
+          reasoningEffort: "xhigh",
+          description: "Maximum paranoia mode for long routes and high-risk resupply gaps.",
+        },
+      };
+
+      const state = {
+        fileName: "",
+        gpxText: "",
+        stats: null,
+        validation: null,
+        packageData: null,
+      };
+
+      const elements = {
+        file: document.getElementById("gpxFile"),
+        routeName: document.getElementById("routeName"),
+        visibility: document.getElementById("visibility"),
+        intelligence: document.getElementById("intelligence"),
+        targetRepo: document.getElementById("targetRepo"),
+        notes: document.getElementById("notes"),
+        validateButton: document.getElementById("validateButton"),
+        downloadButton: document.getElementById("downloadButton"),
+        copyButton: document.getElementById("copyButton"),
+        distance: document.getElementById("distanceValue"),
+        points: document.getElementById("pointsValue"),
+        start: document.getElementById("startValue"),
+        finish: document.getElementById("finishValue"),
+        preview: document.getElementById("routePreview"),
+        message: document.getElementById("message"),
+        resultPanel: document.getElementById("resultPanel"),
+        promptPreview: document.getElementById("promptPreview"),
+      };
+
+      elements.file.addEventListener("change", handleFileChange);
+      elements.validateButton.addEventListener("click", validateCurrentFile);
+      elements.downloadButton.addEventListener("click", downloadPackage);
+      elements.copyButton.addEventListener("click", copyPrompt);
+      ["routeName", "visibility", "intelligence", "targetRepo", "notes"].forEach((id) => {
+        elements[id].addEventListener("input", resetPackage);
+      });
+
+      async function handleFileChange() {
+        const file = elements.file.files && elements.file.files[0];
+        resetPackage();
+        if (!file) return;
+        state.fileName = file.name || "route.gpx";
+        state.gpxText = await file.text();
+        if (!elements.routeName.value.trim()) {
+          elements.routeName.value = state.fileName.replace(/\.gpx$/i, "").replace(/[_-]+/g, " ").trim();
+        }
+        validateCurrentFile();
+      }
+
+      function validateCurrentFile() {
+        const validation = validateGpx(state.fileName, state.gpxText);
+        state.validation = validation;
+        state.stats = validation.stats;
+        renderStats(validation.stats);
+        renderPreview(validation.stats && validation.stats.previewPoints ? validation.stats.previewPoints : []);
+        resetPackage();
+        if (validation.ok) {
+          elements.downloadButton.disabled = false;
+          elements.copyButton.disabled = false;
+          showMessage(`GPX ready: ${validation.stats.routeKm.toFixed(1)} km and ${validation.stats.pointCount.toLocaleString()} points.`, false);
+        } else {
+          showMessage(validation.errors.join(" "), true);
+        }
+      }
+
+      function validateGpx(fileName, gpxText) {
+        const errors = [];
+        const cleanName = String(fileName || "").trim();
+        if (!cleanName.toLowerCase().endsWith(".gpx")) errors.push("Choose a .gpx file.");
+        if (!gpxText || !gpxText.trim()) errors.push("Choose a GPX file first.");
+        let stats = null;
+        if (gpxText && gpxText.trim()) {
+          stats = parseGpxStats(gpxText);
+          if (stats.pointCount < 2) errors.push("The GPX has fewer than two track or route points.");
+          if (stats.routeKm > MAX_GPX_KM) errors.push(`The route is ${stats.routeKm.toFixed(1)} km; the current limit is ${MAX_GPX_KM} km.`);
+        }
+        return { ok: errors.length === 0, errors, stats };
+      }
+
+      function parseGpxStats(text) {
+        const tagRegex = /<(trkpt|rtept)\b([^>]*)>/gi;
+        const points = [];
+        let match;
+        while ((match = tagRegex.exec(text))) {
+          const attrs = match[2];
+          const lat = Number((attrs.match(/\blat=["']([^"']+)["']/i) || [])[1]);
+          const lon = Number((attrs.match(/\blon=["']([^"']+)["']/i) || [])[1]);
+          if (Number.isFinite(lat) && Number.isFinite(lon) && lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180) {
+            points.push({ lat, lon });
+          }
+        }
+        let meters = 0;
+        const bounds = points.length
+          ? { minLat: points[0].lat, maxLat: points[0].lat, minLon: points[0].lon, maxLon: points[0].lon }
+          : null;
+        for (let index = 0; index < points.length; index += 1) {
+          const point = points[index];
+          if (bounds) {
+            bounds.minLat = Math.min(bounds.minLat, point.lat);
+            bounds.maxLat = Math.max(bounds.maxLat, point.lat);
+            bounds.minLon = Math.min(bounds.minLon, point.lon);
+            bounds.maxLon = Math.max(bounds.maxLon, point.lon);
+          }
+          if (index > 0) meters += haversineMeters(points[index - 1], point);
+        }
+        return {
+          pointCount: points.length,
+          routeKm: meters / 1000,
+          start: points[0] || null,
+          finish: points[points.length - 1] || null,
+          bounds,
+          previewPoints: downsample(points, 900),
+        };
+      }
+
+      function renderStats(stats) {
+        elements.distance.textContent = stats ? `${stats.routeKm.toFixed(1)} km` : "-";
+        elements.points.textContent = stats ? stats.pointCount.toLocaleString() : "-";
+        elements.start.textContent = stats && stats.start ? formatCoord(stats.start) : "-";
+        elements.finish.textContent = stats && stats.finish ? formatCoord(stats.finish) : "-";
+      }
+
+      function renderPreview(points) {
+        if (!points.length) {
+          elements.preview.innerHTML = '<rect width="640" height="260" fill="#eef5f0"></rect><text x="320" y="132" text-anchor="middle" fill="#607168" font-size="18" font-weight="800">GPX preview appears here</text>';
+          return;
+        }
+        const width = 640;
+        const height = 260;
+        const pad = 18;
+        const minLat = Math.min(...points.map((point) => point.lat));
+        const maxLat = Math.max(...points.map((point) => point.lat));
+        const minLon = Math.min(...points.map((point) => point.lon));
+        const maxLon = Math.max(...points.map((point) => point.lon));
+        const latRange = Math.max(maxLat - minLat, 0.000001);
+        const lonRange = Math.max(maxLon - minLon, 0.000001);
+        const coords = points.map((point) => {
+          const x = pad + ((point.lon - minLon) / lonRange) * (width - pad * 2);
+          const y = height - pad - ((point.lat - minLat) / latRange) * (height - pad * 2);
+          return `${x.toFixed(1)},${y.toFixed(1)}`;
+        }).join(" ");
+        const start = coords.split(" ")[0];
+        const finish = coords.split(" ")[coords.split(" ").length - 1];
+        elements.preview.innerHTML = [
+          '<rect width="640" height="260" fill="#eef5f0"></rect>',
+          '<line x1="18" y1="130" x2="622" y2="130" stroke="#d8e2dc" stroke-width="1"></line>',
+          '<line x1="320" y1="18" x2="320" y2="242" stroke="#d8e2dc" stroke-width="1"></line>',
+          `<polyline points="${coords}" fill="none" stroke="#2e6b4e" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"></polyline>`,
+          `<circle cx="${start.split(",")[0]}" cy="${start.split(",")[1]}" r="7" fill="#d07a2d"></circle>`,
+          `<circle cx="${finish.split(",")[0]}" cy="${finish.split(",")[1]}" r="7" fill="#14231d"></circle>`,
+          '<text x="18" y="248" fill="#607168" font-size="12" font-weight="800">orange=start · black=finish</text>',
+        ].join("");
+      }
+
+      function buildPackageData() {
+        const validation = state.validation && state.validation.ok ? state.validation : validateGpx(state.fileName, state.gpxText);
+        if (!validation.ok) {
+          showMessage(validation.errors.join(" "), true);
+          return null;
+        }
+        const routeName = elements.routeName.value.trim() || state.fileName.replace(/\.gpx$/i, "") || "Raid route";
+        const routeSlug = slugify(routeName);
+        const intelligenceKey = elements.intelligence.value;
+        const profile = profiles[intelligenceKey] || profiles.balanced;
+        const requestId = `${timestampId()}-${routeSlug}`;
+        const metadata = {
+          request_id: requestId,
+          status: "local-handoff-ready",
+          generated_at_utc: new Date().toISOString(),
+          source: "raid-radar-static-create-page",
+          route_name: routeName,
+          route_slug: routeSlug,
+          original_file_name: state.fileName,
+          visibility: elements.visibility.value,
+          target_repository: elements.targetRepo.value.trim() || null,
+          template_repository: ROUTE_TEMPLATE_REPO,
+          build_target: "guided_handoff",
+          max_km_limit: MAX_GPX_KM,
+          stats: {
+            route_km: Number(validation.stats.routeKm.toFixed(3)),
+            point_count: validation.stats.pointCount,
+            start: validation.stats.start,
+            finish: validation.stats.finish,
+            bounds: validation.stats.bounds,
+          },
+          openai_resource: {
+            mode: "user_owned",
+            browser_policy: "No OpenAI, Codex, or GitHub tokens are stored in this static page.",
+          },
+          intelligence: {
+            key: intelligenceKey,
+            label: profile.label,
+            reasoning_effort: profile.reasoningEffort,
+            description: profile.description,
+          },
+          notes: elements.notes.value.trim(),
+        };
+        const prompt = buildPrompt(metadata);
+        const readme = [
+          "Raid Radar route request",
+          "",
+          "Files:",
+          "- route.gpx: original GPX",
+          "- request.json: route metadata and build settings",
+          "- BUILD_PROMPT.md: prompt for ChatGPT/Codex",
+          "",
+          "Next step:",
+          "Open ChatGPT/Codex with your own account, attach these files, and paste BUILD_PROMPT.md.",
+          "",
+          "Privacy:",
+          "This package was generated locally in the browser. The public Raid Radar site did not upload your GPX.",
+          "",
+        ].join("\n");
+        return {
+          requestId,
+          routeSlug,
+          metadata,
+          prompt,
+          readme,
+          files: [
+            { name: "route.gpx", content: state.gpxText },
+            { name: "request.json", content: `${JSON.stringify(metadata, null, 2)}\n` },
+            { name: "BUILD_PROMPT.md", content: `${prompt}\n` },
+            { name: "README.txt", content: readme },
+          ],
+        };
+      }
+
+      async function downloadPackage() {
+        const data = buildPackageData();
+        if (!data) return;
+        state.packageData = data;
+        const zip = createZip(data.files);
+        const url = URL.createObjectURL(zip);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = `raid-radar-request-${data.routeSlug}.zip`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(url);
+        renderPackage(data, "Request ZIP downloaded. That is a real handoff package.");
+      }
+
+      async function copyPrompt() {
+        const data = state.packageData || buildPackageData();
+        if (!data) return;
+        state.packageData = data;
+        try {
+          await navigator.clipboard.writeText(data.prompt);
+          renderPackage(data, "Codex prompt copied.");
+        } catch (error) {
+          renderPackage(data, "Prompt is ready below. Copy it manually if the browser blocks clipboard access.");
+        }
+      }
+
+      function renderPackage(data, message) {
+        elements.resultPanel.classList.remove("hidden");
+        elements.promptPreview.textContent = data.prompt;
+        showMessage(message, false);
+      }
+
+      function resetPackage() {
+        state.packageData = null;
+        elements.resultPanel.classList.add("hidden");
+        elements.promptPreview.textContent = "";
+      }
+
+      function buildPrompt(metadata) {
+        return [
+          `Build a Raid Radar route app for "${metadata.route_name}" (${metadata.route_slug}).`,
+          "",
+          "Input files attached:",
+          "- route.gpx",
+          "- request.json",
+          "",
+          `Route stats: ${metadata.stats.route_km.toFixed(1)} km, ${metadata.stats.point_count.toLocaleString()} points.`,
+          `Visibility: ${metadata.visibility}.`,
+          `Target repository: ${metadata.target_repository || "not set yet; ask the user for their private route repo"}.`,
+          `Template repository: ${metadata.template_repository}.`,
+          `Intelligence profile: ${metadata.intelligence.label} (${metadata.intelligence.reasoning_effort}).`,
+          "",
+          "Use the user's own OpenAI/Codex resource. Do not put this GPX into Jonas's public Raid Radar repo unless the user explicitly asks for a public route.",
+          "",
+          "Build requirements:",
+          "- Parse the GPX and generate route.json.",
+          "- Create a Raid Radar route app from the public template.",
+          "- Add relevant raid options: supermarkets, petrol stations, bakeries/cafes/restaurants, water, gaps, and late/Sunday risks where relevant.",
+          "- Mark off-route stops with return-to-exact-leave-point logic.",
+          "- Generate gaps.json, segments.json, app-meta.json, manifest, service worker, and offline map-pack logic where feasible.",
+          "- Keep uncertain POIs marked clearly and include final-week recheck notes.",
+          "- Run local checks and browser/offline checks before publishing or handing back the bundle.",
+          "",
+          metadata.notes ? `User notes:\n${metadata.notes}` : "User notes: none.",
+        ].join("\n");
+      }
+
+      function createZip(files) {
+        const encoder = new TextEncoder();
+        const localParts = [];
+        const centralParts = [];
+        let offset = 0;
+        files.forEach((file) => {
+          const nameBytes = encoder.encode(file.name);
+          const contentBytes = encoder.encode(file.content);
+          const crc = crc32(contentBytes);
+          const localHeader = zipHeader({
+            signature: 0x04034b50,
+            crc,
+            size: contentBytes.length,
+            nameBytes,
+            central: false,
+            offset: 0,
+          });
+          localParts.push(localHeader, contentBytes);
+          const centralHeader = zipHeader({
+            signature: 0x02014b50,
+            crc,
+            size: contentBytes.length,
+            nameBytes,
+            central: true,
+            offset,
+          });
+          centralParts.push(centralHeader);
+          offset += localHeader.length + contentBytes.length;
+        });
+        const centralSize = centralParts.reduce((sum, part) => sum + part.length, 0);
+        const end = endOfCentralDirectory(files.length, centralSize, offset);
+        return new Blob([...localParts, ...centralParts, end], { type: "application/zip" });
+      }
+
+      function zipHeader({ signature, crc, size, nameBytes, central, offset }) {
+        const length = central ? 46 : 30;
+        const buffer = new ArrayBuffer(length + nameBytes.length);
+        const view = new DataView(buffer);
+        let index = 0;
+        view.setUint32(index, signature, true); index += 4;
+        if (central) {
+          view.setUint16(index, 20, true); index += 2;
+        }
+        view.setUint16(index, 20, true); index += 2;
+        view.setUint16(index, 0, true); index += 2;
+        view.setUint16(index, 0, true); index += 2;
+        view.setUint16(index, 0, true); index += 2;
+        view.setUint16(index, 0, true); index += 2;
+        view.setUint32(index, crc, true); index += 4;
+        view.setUint32(index, size, true); index += 4;
+        view.setUint32(index, size, true); index += 4;
+        view.setUint16(index, nameBytes.length, true); index += 2;
+        view.setUint16(index, 0, true); index += 2;
+        if (central) {
+          view.setUint16(index, 0, true); index += 2;
+          view.setUint16(index, 0, true); index += 2;
+          view.setUint16(index, 0, true); index += 2;
+          view.setUint32(index, 0, true); index += 4;
+          view.setUint32(index, offset, true); index += 4;
+        }
+        new Uint8Array(buffer).set(nameBytes, length);
+        return new Uint8Array(buffer);
+      }
+
+      function endOfCentralDirectory(fileCount, centralSize, centralOffset) {
+        const buffer = new ArrayBuffer(22);
+        const view = new DataView(buffer);
+        let index = 0;
+        view.setUint32(index, 0x06054b50, true); index += 4;
+        view.setUint16(index, 0, true); index += 2;
+        view.setUint16(index, 0, true); index += 2;
+        view.setUint16(index, fileCount, true); index += 2;
+        view.setUint16(index, fileCount, true); index += 2;
+        view.setUint32(index, centralSize, true); index += 4;
+        view.setUint32(index, centralOffset, true); index += 4;
+        view.setUint16(index, 0, true);
+        return new Uint8Array(buffer);
+      }
+
+      function crc32(bytes) {
+        let crc = -1;
+        for (let index = 0; index < bytes.length; index += 1) {
+          crc = (crc >>> 8) ^ crcTable[(crc ^ bytes[index]) & 0xff];
+        }
+        return (crc ^ -1) >>> 0;
+      }
+
+      const crcTable = (() => {
+        const table = new Uint32Array(256);
+        for (let n = 0; n < 256; n += 1) {
+          let c = n;
+          for (let k = 0; k < 8; k += 1) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+          table[n] = c >>> 0;
+        }
+        return table;
+      })();
+
+      function downsample(points, maxPoints) {
+        if (points.length <= maxPoints) return points;
+        const step = Math.ceil(points.length / maxPoints);
+        const sampled = [];
+        for (let index = 0; index < points.length; index += step) sampled.push(points[index]);
+        if (sampled[sampled.length - 1] !== points[points.length - 1]) sampled.push(points[points.length - 1]);
+        return sampled;
+      }
+
+      function haversineMeters(a, b) {
+        const radius = 6371000;
+        const toRad = (value) => (value * Math.PI) / 180;
+        const dLat = toRad(b.lat - a.lat);
+        const dLon = toRad(b.lon - a.lon);
+        const lat1 = toRad(a.lat);
+        const lat2 = toRad(b.lat);
+        const h = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+        return 2 * radius * Math.asin(Math.sqrt(h));
+      }
+
+      function formatCoord(point) {
+        return `${point.lat.toFixed(4)}, ${point.lon.toFixed(4)}`;
+      }
+
+      function timestampId() {
+        return new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d+Z$/, "z");
+      }
+
+      function slugify(value) {
+        return String(value || "route")
+          .toLowerCase()
+          .normalize("NFKD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^a-z0-9]+/g, "-")
+          .replace(/^-+|-+$/g, "")
+          .slice(0, 60) || "route";
+      }
+
+      function showMessage(text, isError) {
+        elements.message.textContent = text;
+        elements.message.classList.remove("hidden", "error");
+        if (isError) elements.message.classList.add("error");
+      }
+
+      window.raidRadarCreate = {
+        validateGpx,
+        parseGpxStats,
+        createZip,
+        buildPrompt,
+        slugify,
+      };
+    </script>
   </body>
 </html>
