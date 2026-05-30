@@ -403,7 +403,9 @@ async function registerServiceWorker() {
     return;
   }
   try {
-    const registration = await navigator.serviceWorker.register("./sw.js");
+    const registration = await navigator.serviceWorker.register("./sw.js", { updateViaCache: "none" });
+    registration.update().catch((error) => logStatus(`Service Worker update check skipped: ${error.message}`));
+    if (registration.waiting) registration.waiting.postMessage({ type: "SKIP_WAITING" });
     await navigator.serviceWorker.ready;
     setBadge(navigator.onLine ? "Cached" : "Offline", "ready");
     logStatus(`Service Worker ready: ${registration.scope}`);
