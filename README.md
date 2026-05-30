@@ -8,7 +8,7 @@ Brand:
 - Launcher claim: `Find the next raid before the bonk finds you`
 - Route-app claim: `Raid Before You Bonk`
 
-The GitHub repository slug is still `race-cockpit` so existing GitHub Pages links keep working. The public product and visible app branding are Raid Radar.
+The GitHub repository slug is still `race-cockpit`; the public product and visible app branding are Raid Radar.
 
 ## Public App
 
@@ -16,13 +16,13 @@ GitHub Pages publishes from the `pages` branch, `/docs`.
 
 Launcher:
 
-https://deinemuttersitztaufmeinemlenker.github.io/race-cockpit/
+https://jonasmarcuswalter.github.io/race-cockpit/
 
 Route apps:
 
-- Zürich test: https://deinemuttersitztaufmeinemlenker.github.io/race-cockpit/zuerich-test/
-- Flensburg Rückfahrt: https://deinemuttersitztaufmeinemlenker.github.io/race-cockpit/flensburg-rueckfahrt/
-- Hamburg Backyard: https://deinemuttersitztaufmeinemlenker.github.io/race-cockpit/hamburg-backyard/
+- Zürich test: https://jonasmarcuswalter.github.io/race-cockpit/zuerich-test/
+- Flensburg Rückfahrt: https://jonasmarcuswalter.github.io/race-cockpit/flensburg-rueckfahrt/
+- Hamburg Backyard: https://jonasmarcuswalter.github.io/race-cockpit/hamburg-backyard/
 
 ## Parked GPX Intake
 
@@ -54,10 +54,10 @@ Worker source:
 Configure and deploy it with:
 
 - `GITHUB_TOKEN`: fine-grained token with contents write + issues write
-- `GITHUB_OWNER`: `deinemuttersitztaufmeinemlenker`
+- `GITHUB_OWNER`: `jonasmarcuswalter`
 - `GITHUB_REPO`: `race-cockpit`
 - `GITHUB_BRANCH`: `pages`
-- `PUBLIC_ORIGIN`: `https://deinemuttersitztaufmeinemlenker.github.io`
+- `PUBLIC_ORIGIN`: `https://jonasmarcuswalter.github.io`
 
 If this feature returns later, add a public config file with `window.RAID_RADAR_INTAKE_ENDPOINT`.
 

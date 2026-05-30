@@ -1,8 +1,8 @@
 const MAX_GPX_KM = 1000;
-const DEFAULT_OWNER = "deinemuttersitztaufmeinemlenker";
+const DEFAULT_OWNER = "jonasmarcuswalter";
 const DEFAULT_REPO = "race-cockpit";
 const DEFAULT_BRANCH = "pages";
-const DEFAULT_ORIGIN = "https://deinemuttersitztaufmeinemlenker.github.io";
+const DEFAULT_ORIGIN = "https://jonasmarcuswalter.github.io";
 
 export default {
   async fetch(request, env) {

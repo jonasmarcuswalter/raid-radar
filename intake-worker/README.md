@@ -16,9 +16,9 @@ Why this exists: GitHub Pages is static and cannot safely hold a GitHub token. T
 ## Required Secrets / Vars
 
 - `GITHUB_TOKEN`: fine-grained token with contents write + issues write for this repo.
-- `GITHUB_OWNER`: defaults to `deinemuttersitztaufmeinemlenker`.
+- `GITHUB_OWNER`: defaults to `jonasmarcuswalter`.
 - `GITHUB_REPO`: defaults to `race-cockpit`.
 - `GITHUB_BRANCH`: defaults to `pages`.
-- `PUBLIC_ORIGIN`: defaults to `https://deinemuttersitztaufmeinemlenker.github.io`.
+- `PUBLIC_ORIGIN`: defaults to `https://jonasmarcuswalter.github.io`.
 
 After deployment, set `window.RAID_RADAR_INTAKE_ENDPOINT` in `docs/intake-config.js` to the worker `/route-request` URL.
