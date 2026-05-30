@@ -56,14 +56,17 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+  const requestUrl = new URL(event.request.url);
+  if (requestUrl.origin !== self.location.origin) return;
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
       return fetch(event.request)
-        .then((response) => {
+        .then(async (response) => {
           if (response && response.ok) {
             const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+            const cache = await caches.open(CACHE_NAME);
+            await cache.put(event.request, clone);
           }
           return response;
         })
@@ -427,10 +430,11 @@ def build(args: argparse.Namespace) -> dict:
                 "status": "missing",
                 "label": "PMTiles Route-Korridor",
                 "url": "",
+                "renderer": "pending",
                 "expected_size_mb": None,
                 "note": (
                     "PMTiles-Kartenpack ist noch nicht hinterlegt. Route, POIs, Marker und Cockpit "
-                    "funktionieren nach Kern-Cache trotzdem offline."
+                    "funktionieren nach Kern-Cache trotzdem offline; Basemap-Anzeige folgt erst mit PMTiles-Renderer."
                 ),
             },
         ),

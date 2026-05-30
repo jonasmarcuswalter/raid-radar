@@ -1,4 +1,4 @@
-const CACHE_NAME = "gpx-iphone-test-offline-v1-2026-05-30T170000z0000";
+const CACHE_NAME = "gpx-iphone-test-offline-v1-2026-05-30T171500z0000";
 const CACHE_PREFIX = "gpx-iphone-test-offline-v1-";
 const ASSETS = [
   "./",
@@ -46,14 +46,17 @@ self.addEventListener("activate", (event) => {
 
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
+  const requestUrl = new URL(event.request.url);
+  if (requestUrl.origin !== self.location.origin) return;
   event.respondWith(
     caches.match(event.request).then((cached) => {
       if (cached) return cached;
       return fetch(event.request)
-        .then((response) => {
+        .then(async (response) => {
           if (response && response.ok) {
             const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+            const cache = await caches.open(CACHE_NAME);
+            await cache.put(event.request, clone);
           }
           return response;
         })

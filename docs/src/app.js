@@ -1,5 +1,5 @@
 const MANUAL_CACHE_NAME = "race-cockpit-manual-offline-v1";
-const OFFLINE_MAP_PACK_KEY = "offlineMapPackStatus";
+const OFFLINE_MAP_PACK_KEY_PREFIX = "offlineMapPackStatus:";
 const LAST_OFFLINE_CHECK_KEY = "lastOfflineCheck";
 const CORE_OFFLINE_ASSETS = [
   "./",
@@ -43,7 +43,7 @@ const state = {
   markerImage: new Image(),
   leaflet: null,
   offline: {
-    mapPack: loadMapPackStatus(),
+    mapPack: { status: "missing" },
     lastCheck: localStorage.getItem(LAST_OFFLINE_CHECK_KEY) || "",
     snapshot: null,
   },
@@ -53,10 +53,25 @@ const els = {};
 
 function loadMapPackStatus() {
   try {
-    return JSON.parse(localStorage.getItem(OFFLINE_MAP_PACK_KEY) || '{"status":"missing"}');
+    return JSON.parse(localStorage.getItem(mapPackStorageKey()) || '{"status":"missing"}');
   } catch {
     return { status: "missing" };
   }
+}
+
+function saveMapPackStatus(status) {
+  state.offline.mapPack = {
+    ...status,
+    route_source: state.meta?.route_source || "",
+    pack_url: state.meta?.offline_map_pack?.url || "",
+  };
+  localStorage.setItem(mapPackStorageKey(), JSON.stringify(state.offline.mapPack));
+}
+
+function mapPackStorageKey() {
+  const routeId = state.meta?.route_source || state.meta?.app_name || location.pathname;
+  const packUrl = state.meta?.offline_map_pack?.url || "no-pack";
+  return `${OFFLINE_MAP_PACK_KEY_PREFIX}${routeId}:${packUrl}`;
 }
 
 const fallbackDemoPositions = [
@@ -88,6 +103,7 @@ async function init() {
   state.gaps = gaps;
   state.segments = segments;
   state.meta = meta;
+  state.offline.mapPack = loadMapPackStatus();
   configureAppShell();
   setupLeafletMap();
   const firstDemo = getDemoPositions()[0] || { label: "Start", km: 0 };
@@ -225,10 +241,14 @@ function setupLeafletMap() {
     preferCanvas: true,
   });
   L.control.zoom({ position: "bottomright" }).addTo(map);
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19,
-    attribution: "&copy; OpenStreetMap contributors",
-  }).addTo(map);
+  if (navigator.onLine) {
+    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap contributors",
+    }).addTo(map);
+  } else if (els.mapHint) {
+    els.mapHint.textContent = "Offline: Route/POIs ohne Basemap · PMTiles pending";
+  }
   const routeLatLngs = state.route.points.map(([lat, lon]) => [lat, lon]);
   const routeLine = L.polyline(routeLatLngs, {
     color: "#2e6b4e",
@@ -741,25 +761,34 @@ function normalizeMapPackStatus() {
       note: configured.note || "PMTiles-Kartenpack ist noch nicht hinterlegt. Route, POIs und GPS funktionieren trotzdem offline.",
     };
   }
+  const savedStatus = state.offline.mapPack?.status || "available";
+  const status = savedStatus === "cached" && !isMapPackRenderable(configured) ? "stored" : savedStatus;
   return {
-    status: state.offline.mapPack?.status || "available",
+    status,
     label: configured.label || "Offline-Kartenpack",
     url: configured.url,
     size: state.offline.mapPack?.size || configured.expected_size_mb || null,
-    note: state.offline.mapPack?.note || configured.note || "Kartenpack kann lokal gespeichert werden.",
+    note:
+      status === "stored"
+        ? "Kartenpack ist gespeichert; die Basemap-Anzeige folgt mit dem PMTiles-Renderer."
+        : state.offline.mapPack?.note || configured.note || "Kartenpack kann lokal gespeichert werden.",
     updatedAt: state.offline.mapPack?.updatedAt || "",
+    renderable: isMapPackRenderable(configured),
   };
+}
+
+function isMapPackRenderable(configured = state.meta?.offline_map_pack || {}) {
+  return ["leaflet-pmtiles", "pmtiles-leaflet"].includes(configured.renderer || configured.display || "");
 }
 
 async function downloadMapPack() {
   const configured = state.meta?.offline_map_pack || {};
   if (!configured.url) {
-    state.offline.mapPack = {
+    saveMapPackStatus({
       status: "missing",
       updatedAt: new Date().toISOString(),
       note: "PMTiles noch nicht hinterlegt. Für Hamburg bauen wir als nächsten Schritt ein Route-Korridor-Pack.",
-    };
-    localStorage.setItem(OFFLINE_MAP_PACK_KEY, JSON.stringify(state.offline.mapPack));
+    });
     renderOfflinePanel();
     logStatus("Kartenpack: PMTiles ist noch nicht hinterlegt. Kern-App bleibt offline nutzbar.");
     return;
@@ -776,23 +805,24 @@ async function downloadMapPack() {
     const cache = await caches.open(MANUAL_CACHE_NAME);
     await cache.put(configured.url, response.clone());
     const length = response.headers.get("content-length");
-    state.offline.mapPack = {
-      status: "cached",
+    const renderable = isMapPackRenderable(configured);
+    saveMapPackStatus({
+      status: renderable ? "cached" : "stored",
       url: configured.url,
       size: length ? Number(length) : configured.expected_size_mb || null,
       updatedAt: new Date().toISOString(),
-      note: "PMTiles-Kartenpack ist im Browser-Cache gespeichert.",
-    };
-    localStorage.setItem(OFFLINE_MAP_PACK_KEY, JSON.stringify(state.offline.mapPack));
-    logStatus("Kartenpack gespeichert.");
+      note: renderable
+        ? "PMTiles-Kartenpack ist im Browser-Cache gespeichert und als Basemap vorbereitet."
+        : "PMTiles-Kartenpack ist gespeichert; die Anzeige als Basemap folgt mit dem PMTiles-Renderer.",
+    });
+    logStatus(renderable ? "Kartenpack gespeichert." : "Kartenpack gespeichert, Basemap-Renderer noch nicht aktiv.");
   } catch (error) {
-    state.offline.mapPack = {
+    saveMapPackStatus({
       status: "error",
       url: configured.url,
       updatedAt: new Date().toISOString(),
       note: error.message,
-    };
-    localStorage.setItem(OFFLINE_MAP_PACK_KEY, JSON.stringify(state.offline.mapPack));
+    });
     logStatus(`Kartenpack-Fehler: ${error.message}`);
   } finally {
     els.downloadMapPackButton.disabled = false;
@@ -805,15 +835,18 @@ function renderOfflinePanel(snapshot = state.offline.snapshot) {
   if (!els.offlineSummary || !els.offlineStatusGrid) return;
   const mapPack = normalizeMapPackStatus();
   const core = snapshot?.core || { total: CORE_OFFLINE_ASSETS.length, cachedCount: 0, missing: CORE_OFFLINE_ASSETS, cached: new Set() };
+  const serviceWorkerReady = snapshot?.serviceWorker?.supported && snapshot?.serviceWorker?.controlled;
+  const mapPackUsable = mapPack.status === "cached" && mapPack.renderable;
   const ready =
     core.cachedCount === core.total &&
+    serviceWorkerReady &&
     (snapshot?.routeReady ?? false) &&
     (snapshot?.poisReady ?? false) &&
     (snapshot?.markerReady ?? false) &&
     (snapshot?.leafletReady ?? false);
   els.offlineSummary.innerHTML = `<strong>${ready ? "Kern-App offline bereit" : "Offline-Kern noch prüfen"}</strong>
-    ${ready ? "App-Shell, Route, POIs, Marker und Leaflet sind gecached." : "Tippe zuerst auf Kern offline speichern, dann auf Offline prüfen."}
-    ${mapPack.status === "cached" ? " Kartenpack ist gespeichert." : " Vollständige Offline-Basemap folgt über PMTiles."}`;
+    ${ready ? "App-Shell, Service Worker, Route, POIs, Marker und Leaflet sind gecached." : "Tippe zuerst auf Kern offline speichern, dann auf Offline prüfen. Wenn Service Worker noch nicht aktiv ist: einmal neu laden."}
+    ${mapPackUsable ? " Kartenpack ist gespeichert und als Basemap vorbereitet." : mapPack.status === "stored" ? " Kartenpack ist gespeichert, aber die Basemap-Anzeige folgt noch." : " Vollständige Offline-Basemap folgt über PMTiles."}`;
   const lastCheck = snapshot?.checkedAt || state.offline.lastCheck || "noch nicht geprüft";
   const storage = snapshot?.storage;
   const storageText =
@@ -826,7 +859,8 @@ function renderOfflinePanel(snapshot = state.offline.snapshot) {
     offlineCard("POIs", snapshot?.poisReady ? "ready" : "missing", snapshot?.poisReady ? `${state.pois.length} Stops offline verfügbar` : "pois.json fehlt im Cache"),
     offlineCard("Rider Marker", snapshot?.markerReady ? "ready" : "missing", snapshot?.markerReady ? "Foto-Marker cached" : "Marker-Bilder fehlen im Cache"),
     offlineCard("Map Library", snapshot?.leafletReady ? "ready" : "missing", snapshot?.leafletReady ? "Leaflet lokal cached" : "Leaflet fehlt im Cache"),
-    offlineCard("Offline Map Pack", mapPack.status === "cached" ? "ready" : mapPack.status === "error" ? "missing" : "warn", mapPack.note),
+    offlineCard("Service Worker", serviceWorkerReady ? "ready" : "warn", serviceWorkerReady ? "aktiv und kontrolliert diese App" : "noch nicht aktiv kontrollierend; App einmal neu laden"),
+    offlineCard("Offline Map Pack", mapPackUsable ? "ready" : mapPack.status === "error" ? "missing" : "warn", mapPack.note),
     offlineCard("Speicher", "ready", storageText),
     offlineCard("Letzter Check", snapshot ? "ready" : "warn", formatCheckTime(lastCheck)),
   ];
