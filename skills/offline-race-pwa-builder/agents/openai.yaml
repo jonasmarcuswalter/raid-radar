@@ -1,0 +1,4 @@
+interface:
+  display_name: "Offline Race PWA Builder"
+  short_description: "Build offline race cockpit PWAs."
+  default_prompt: "Build or update an offline race PWA from GPX and POI data, then verify local, HTTPS, iPhone, and offline behavior."
