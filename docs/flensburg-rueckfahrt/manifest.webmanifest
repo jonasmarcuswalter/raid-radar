@@ -1,7 +1,7 @@
 {
   "name": "Raid Radar · Flensburg Rückfahrt",
   "short_name": "Raid Radar",
-  "description": "Offline race cockpit for the Flensburg Rückfahrt Sunday route.",
+  "description": "Offline Raid Radar for the Flensburg Rückfahrt Sunday route.",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",

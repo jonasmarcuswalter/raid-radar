@@ -17,15 +17,21 @@
   <body>
     <div id="app">
       <header class="topbar">
-        <div>
-          <p class="eyebrow">RAID RADAR · Next Raid incoming</p>
-          <h1>Flensburg Rückfahrt</h1>
+        <div class="brand-lockup" aria-label="Raid Radar">
+          <div class="raid-mark" aria-hidden="true">
+            <span></span>
+          </div>
+          <div>
+            <p class="brand-name">Raid Radar</p>
+            <p class="eyebrow">Next Raid incoming</p>
+            <h1>Flensburg Rückfahrt</h1>
+          </div>
         </div>
         <div id="offlineBadge" class="badge">Loading</div>
       </header>
 
       <main>
-        <section class="cockpit" aria-label="Race cockpit">
+        <section class="cockpit" aria-label="Raid radar">
           <div class="metric primary">
             <span>Route-km</span>
             <strong id="metricKm">--</strong>

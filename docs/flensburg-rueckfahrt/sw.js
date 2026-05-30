@@ -1,4 +1,4 @@
-const CACHE_NAME = "raid-radar-flensburg-rueckfahrt-offline-v1-2026-05-30T173147z0000";
+const CACHE_NAME = "raid-radar-flensburg-rueckfahrt-offline-v1-2026-05-30T184900z0000";
 const CACHE_PREFIX = "raid-radar-flensburg-rueckfahrt-offline-v1-";
 const ASSETS = [
   "./",

@@ -220,11 +220,17 @@ function bindEvents() {
 
 function configureAppShell() {
   const appName = state.meta?.app_name || "Offline Race";
-  document.title = `${appName} Cockpit`;
+  const routeName = state.meta?.route_name || appName;
+  const brandName = state.meta?.brand_name || "Raid Radar";
+  document.title = `${brandName} · ${routeName}`;
   const heading = document.querySelector(".topbar h1");
-  if (heading) heading.textContent = state.meta?.short_name || appName;
+  if (heading) heading.textContent = routeName;
+  const eyebrow = document.querySelector(".topbar .eyebrow");
+  if (eyebrow) eyebrow.textContent = state.meta?.brand_tagline || "Next Raid incoming";
   const appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]');
-  if (appleTitle) appleTitle.setAttribute("content", state.meta?.short_name || appName);
+  if (appleTitle) appleTitle.setAttribute("content", brandName);
+  const brand = document.querySelector(".brand-name");
+  if (brand) brand.textContent = brandName;
   if (els.mapHint && state.meta?.basemap?.status) {
     els.mapHint.textContent = basemapLabel(state.meta.basemap.status);
   }

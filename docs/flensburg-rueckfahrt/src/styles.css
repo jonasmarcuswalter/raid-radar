@@ -48,6 +48,70 @@ button {
   padding: 6px 0 12px;
 }
 
+.brand-lockup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.raid-mark {
+  position: relative;
+  flex: 0 0 auto;
+  width: 54px;
+  height: 54px;
+  border: 2px solid rgba(46, 107, 78, 0.92);
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.96) 0 13%, transparent 14%),
+    radial-gradient(circle at center, transparent 0 31%, rgba(46, 107, 78, 0.17) 32% 34%, transparent 35%),
+    radial-gradient(circle at center, transparent 0 58%, rgba(46, 107, 78, 0.2) 59% 62%, transparent 63%),
+    #eaf5ee;
+  box-shadow: 0 8px 22px rgba(25, 47, 37, 0.16);
+  overflow: hidden;
+}
+
+.raid-mark::before {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border-left: 2px solid rgba(46, 107, 78, 0.52);
+  border-top: 2px solid rgba(46, 107, 78, 0.52);
+  border-radius: 50%;
+}
+
+.raid-mark::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 24px;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), rgba(46, 107, 78, 0));
+  transform: rotate(-34deg);
+  transform-origin: left center;
+}
+
+.raid-mark span {
+  position: absolute;
+  right: 13px;
+  top: 15px;
+  width: 8px;
+  height: 8px;
+  border: 2px solid white;
+  border-radius: 50%;
+  background: var(--accent-2);
+  box-shadow: 0 0 0 3px rgba(208, 122, 45, 0.24);
+}
+
+.brand-name {
+  margin: 0;
+  color: var(--accent);
+  font-size: 22px;
+  font-weight: 950;
+  line-height: 0.95;
+}
+
 .eyebrow {
   margin: 0 0 2px;
   color: var(--muted);

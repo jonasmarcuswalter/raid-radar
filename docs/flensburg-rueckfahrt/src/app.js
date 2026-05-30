@@ -229,6 +229,8 @@ function configureAppShell() {
   if (eyebrow && state.meta?.brand_tagline) eyebrow.textContent = state.meta.brand_tagline;
   const appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]');
   if (appleTitle) appleTitle.setAttribute("content", brandName);
+  const brand = document.querySelector(".brand-name");
+  if (brand) brand.textContent = brandName;
   if (els.mapHint && state.meta?.basemap?.status) {
     els.mapHint.textContent = basemapLabel(state.meta.basemap.status);
   }

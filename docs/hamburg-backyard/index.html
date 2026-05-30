@@ -5,27 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     <meta name="theme-color" content="#15392c" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-title" content="Backyard Ultra" />
+    <meta name="apple-mobile-web-app-title" content="Raid Radar" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <link rel="manifest" href="./manifest.webmanifest" />
     <link rel="apple-touch-icon" href="./assets/apple-touch-icon.png" />
     <link rel="icon" href="./assets/icon-192.png" />
     <link rel="stylesheet" href="./vendor/leaflet/leaflet.css" />
     <link rel="stylesheet" href="./src/styles.css" />
-    <title>Hamburg Backyard Ultra Cockpit</title>
+    <title>Raid Radar · Hamburg Backyard</title>
   </head>
   <body>
     <div id="app">
       <header class="topbar">
-        <div>
-          <p class="eyebrow">Offline Race PWA</p>
-          <h1>Hamburg Backyard</h1>
+        <div class="brand-lockup" aria-label="Raid Radar">
+          <div class="raid-mark" aria-hidden="true">
+            <span></span>
+          </div>
+          <div>
+            <p class="brand-name">Raid Radar</p>
+            <p class="eyebrow">Next Raid incoming</p>
+            <h1>Hamburg Backyard</h1>
+          </div>
         </div>
         <div id="offlineBadge" class="badge">Loading</div>
       </header>
 
       <main>
-        <section class="cockpit" aria-label="Race cockpit">
+        <section class="cockpit" aria-label="Raid radar">
           <div class="metric primary">
             <span>Route-km</span>
             <strong id="metricKm">--</strong>
