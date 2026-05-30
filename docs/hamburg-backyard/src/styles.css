@@ -104,6 +104,13 @@ button {
   box-shadow: 0 0 0 3px rgba(208, 122, 45, 0.24);
 }
 
+.raid-logo {
+  flex: 0 0 auto;
+  width: 58px;
+  height: 58px;
+  filter: drop-shadow(0 8px 18px rgba(25, 47, 37, 0.16));
+}
+
 .brand-name {
   margin: 0;
   color: var(--accent);

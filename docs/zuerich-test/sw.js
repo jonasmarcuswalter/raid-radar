@@ -1,4 +1,4 @@
-const CACHE_NAME = "raid-radar-zuerich-test-offline-v1-2026-05-30T185810z0000";
+const CACHE_NAME = "raid-radar-zuerich-test-offline-v1-2026-05-30T190140z0000";
 const CACHE_PREFIX = "raid-radar-zuerich-test-offline-v1-";
 const ASSETS = [
   "./",
@@ -17,6 +17,7 @@ const ASSETS = [
   "./data/segments.json",
   "./data/app-meta.json",
   "./maps/corridor-map.json",
+  "./assets/raid-radar-logo.svg",
   "./assets/rider-marker.png",
   "./assets/rider-marker@2x.png",
   "./assets/icon-192.png",

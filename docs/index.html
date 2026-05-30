@@ -91,6 +91,13 @@
         box-shadow: 0 0 0 3px rgba(208, 122, 45, 0.24);
       }
 
+      .raid-logo {
+        flex: 0 0 auto;
+        width: 68px;
+        height: 68px;
+        filter: drop-shadow(0 10px 18px rgba(25, 47, 37, 0.15));
+      }
+
       .brand-name {
         margin: 0;
         color: var(--accent);
@@ -150,12 +157,10 @@
   <body>
     <main>
       <div class="brand-lockup" aria-label="Raid Radar">
-        <div class="raid-mark" aria-hidden="true">
-          <span></span>
-        </div>
+        <img class="raid-logo" src="./assets/raid-radar-logo.svg" alt="" width="68" height="68" aria-hidden="true" />
         <div>
           <p class="brand-name">Raid Radar</p>
-          <p class="eyebrow">Find the next raid before the bonk finds you</p>
+          <p class="eyebrow">Raid Before You Bonk</p>
         </div>
       </div>
       <h1>Route Apps</h1>

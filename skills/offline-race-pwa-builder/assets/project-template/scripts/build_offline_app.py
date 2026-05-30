@@ -441,7 +441,7 @@ def build(args: argparse.Namespace) -> dict:
         ),
         "brand_name": config.get("brand_name", "Raid Radar"),
         "route_name": config.get("route_name", app_name),
-        "brand_tagline": config.get("brand_tagline", "Find the next raid before the bonk finds you"),
+        "brand_tagline": config.get("brand_tagline", "Raid Before You Bonk"),
         "raid_vocabulary": config.get(
             "raid_vocabulary",
             "Next Raid = nächste verlässliche Versorgung; Raid Options = Supermarkt, Tankstelle, Restaurant, Cafe, Baecker oder Kiosk entlang der Route.",
@@ -473,6 +473,7 @@ def build(args: argparse.Namespace) -> dict:
         copy_tree_file(APP_DIR / "src" / name, DIST_DIR / "src" / name)
     for name in [
         "rider-marker-source.jpg",
+        "raid-radar-logo.svg",
         "rider-marker.png",
         "rider-marker@2x.png",
         "icon-192.png",
@@ -503,6 +504,7 @@ def build(args: argparse.Namespace) -> dict:
         "./data/gaps.json",
         "./data/segments.json",
         "./data/app-meta.json",
+        "./assets/raid-radar-logo.svg",
         "./assets/rider-marker.png",
         "./assets/rider-marker@2x.png",
         "./assets/icon-192.png",

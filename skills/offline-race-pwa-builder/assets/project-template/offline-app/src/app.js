@@ -62,7 +62,7 @@ const state = {
 };
 
 const els = {};
-const BRAND_CLAIM = "Find the next raid before the bonk finds you";
+const BRAND_CLAIM = "Raid Before You Bonk";
 
 function loadMapPackStatus() {
   try {

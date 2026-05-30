@@ -2,7 +2,7 @@
 
 Static offline Raid Radar PWA for GPX routes, next-raid decisions, route snapping, POIs, and iPhone/Safari service-worker behavior.
 
-Brand claim: `Find the next raid before the bonk finds you`.
+Brand claim: `Raid Before You Bonk`.
 
 ## Published Apps
 
