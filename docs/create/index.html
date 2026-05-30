@@ -380,14 +380,14 @@
 
       <div class="top-row">
         <a class="back-link" href="/raid-radar/">Back to routes</a>
-        <a class="action" href="https://chatgpt.com/" rel="noopener">Open ChatGPT</a>
+        <a class="action" href="https://chatgpt.com/codex/" rel="noopener">Open Codex</a>
       </div>
 
       <section class="hero" aria-labelledby="create-title">
         <span class="hero-kicker">Working local MVP</span>
         <h1 id="create-title">Wanna create your own raid route?</h1>
         <p class="subclaim">Raid Before You Bonk, now for your own GPX.</p>
-        <p class="hero-copy">This page now does the first useful part for real: validate a GPX locally, preview the route, choose raid intelligence, and download a route-request package for ChatGPT/Codex. Nothing is uploaded from this page.</p>
+        <p class="hero-copy">This page creates a Codex-ready route package: validate a GPX locally, preview the route, choose raid intelligence, download the ZIP, then run it through your own Codex workspace. Nothing is uploaded from this page.</p>
       </section>
 
       <section class="panel highlight" aria-labelledby="builder-title">
@@ -444,7 +444,7 @@
 
             <div class="notice" role="note">
               <strong>Privacy model</strong>
-              <span>No network call, no API key, no GitHub token. This creates a handoff package that the rider can give to their own ChatGPT/Codex setup.</span>
+              <span>No network call, no API key, no GitHub token. This creates a handoff package for the rider’s own Codex and GitHub repo.</span>
             </div>
 
             <div id="message" class="message hidden" role="status"></div>
@@ -485,24 +485,24 @@
         <ul class="result-list">
           <li>
             <strong>What the ZIP contains</strong>
-            <span><code>route.gpx</code>, <code>request.json</code>, <code>BUILD_PROMPT.md</code>, and <code>README.txt</code>.</span>
+            <span>A ready repo folder under <code>route-requests/pending/&lt;request-id&gt;/</code> with GPX, metadata, prompt, and README.</span>
           </li>
           <li>
             <strong>What to do next</strong>
-            <span>Open ChatGPT/Codex with your own account, attach the ZIP or its files, paste the prompt, and ask it to build the Raid Radar route app from the public template.</span>
+            <span>Create or choose your own GitHub repo, unzip this package into the repo root, then open Codex for that repo and paste the prompt. Codex builds from Jonas’s public template into your repo.</span>
           </li>
           <li>
             <strong>What this does not do yet</strong>
-            <span>It does not automatically deploy to GitHub Pages. That needs the authenticated Connector/GitHub-App flow next.</span>
+            <span>It does not automatically run Codex or deploy GitHub Pages. Your Codex workspace does that part in the repo you connect.</span>
           </li>
         </ul>
         <div id="promptPreview" class="codebox" aria-label="Codex prompt preview"></div>
       </section>
 
       <section class="panel" aria-labelledby="flow-title">
-        <h2 id="flow-title">How this becomes a full route app</h2>
-        <p>The downloadable package uses the same request shape as the future ChatGPT App: GPX, route metadata, selected intelligence level, privacy choice, and a Codex build prompt.</p>
-        <p>The next production step is an authenticated connector that writes this package into the rider’s private repo and launches the build there. Until then, this local builder is the safe working handoff.</p>
+        <h2 id="flow-title">Codex workflow</h2>
+        <p>Use your own Codex, connected to your own GitHub repo. Unzip the package into that repo and tell Codex to use `jonasmarcuswalter/raid-radar` as the public template source.</p>
+        <p>Codex should create or update the route app in your repo, run the checks there, and then you decide whether to keep it private or publish it via GitHub Pages.</p>
       </section>
     </main>
 
@@ -707,7 +707,7 @@
           visibility: elements.visibility.value,
           target_repository: elements.targetRepo.value.trim() || null,
           template_repository: ROUTE_TEMPLATE_REPO,
-          build_target: "guided_handoff",
+          build_target: "codex_handoff",
           max_km_limit: MAX_GPX_KM,
           stats: {
             route_km: Number(validation.stats.routeKm.toFixed(3)),
@@ -718,7 +718,7 @@
           },
           openai_resource: {
             mode: "user_owned",
-            browser_policy: "No OpenAI, Codex, or GitHub tokens are stored in this static page.",
+            browser_policy: "No OpenAI, Codex, or GitHub tokens are stored in this static page. Run the build from the rider's own Codex workspace.",
           },
           intelligence: {
             key: intelligenceKey,
@@ -729,19 +729,20 @@
           notes: elements.notes.value.trim(),
         };
         const prompt = buildPrompt(metadata);
+        const basePath = `route-requests/pending/${requestId}`;
         const readme = [
           "Raid Radar route request",
           "",
           "Files:",
-          "- route.gpx: original GPX",
-          "- request.json: route metadata and build settings",
-          "- BUILD_PROMPT.md: prompt for ChatGPT/Codex",
+          `- ${basePath}/route.gpx: original GPX`,
+          `- ${basePath}/request.json: route metadata and build settings`,
+          `- ${basePath}/BUILD_PROMPT.md: prompt for Codex`,
           "",
           "Next step:",
-          "Open ChatGPT/Codex with your own account, attach these files, and paste BUILD_PROMPT.md.",
+          "Create or choose your own GitHub repo, unzip this package into the repo root, open Codex for that repo, and paste BUILD_PROMPT.md.",
           "",
           "Privacy:",
-          "This package was generated locally in the browser. The public Raid Radar site did not upload your GPX.",
+          "This package was generated locally in the browser. The public Raid Radar site did not upload your GPX. Jonas's public repo is only the template source.",
           "",
         ].join("\n");
         return {
@@ -751,10 +752,10 @@
           prompt,
           readme,
           files: [
-            { name: "route.gpx", content: state.gpxText },
-            { name: "request.json", content: `${JSON.stringify(metadata, null, 2)}\n` },
-            { name: "BUILD_PROMPT.md", content: `${prompt}\n` },
-            { name: "README.txt", content: readme },
+            { name: `${basePath}/route.gpx`, content: state.gpxText },
+            { name: `${basePath}/request.json`, content: `${JSON.stringify(metadata, null, 2)}\n` },
+            { name: `${basePath}/BUILD_PROMPT.md`, content: `${prompt}\n` },
+            { name: `${basePath}/README.txt`, content: readme },
           ],
         };
       }
@@ -803,9 +804,9 @@
         return [
           `Build a Raid Radar route app for "${metadata.route_name}" (${metadata.route_slug}).`,
           "",
-          "Input files attached:",
-          "- route.gpx",
-          "- request.json",
+          "Input files are in this repository under:",
+          `- route-requests/pending/${metadata.request_id}/route.gpx`,
+          `- route-requests/pending/${metadata.request_id}/request.json`,
           "",
           `Route stats: ${metadata.stats.route_km.toFixed(1)} km, ${metadata.stats.point_count.toLocaleString()} points.`,
           `Visibility: ${metadata.visibility}.`,
@@ -813,7 +814,13 @@
           `Template repository: ${metadata.template_repository}.`,
           `Intelligence profile: ${metadata.intelligence.label} (${metadata.intelligence.reasoning_effort}).`,
           "",
-          "Use the user's own OpenAI/Codex resource. Do not put this GPX into Jonas's public Raid Radar repo unless the user explicitly asks for a public route.",
+          "You are Codex running in the user's own Codex workspace. Use the user's own OpenAI/Codex resource and the user's own GitHub repo. Do not put this GPX into Jonas's public Raid Radar repo.",
+          "",
+          "Repository workflow:",
+          "- Use or create the user's target repo as the destination for private route data and generated app files.",
+          "- Use jonasmarcuswalter/raid-radar only as the public template/source repo.",
+          "- If target_repository is not set, ask the user which repo Codex should work in before committing anything.",
+          "- Keep route.gpx and generated route data in the user-owned repo unless the user explicitly chooses public sharing.",
           "",
           "Build requirements:",
           "- Parse the GPX and generate route.json.",

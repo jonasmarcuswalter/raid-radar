@@ -28,24 +28,21 @@ Route apps:
 - Flensburg Rückfahrt: https://jonasmarcuswalter.github.io/raid-radar/flensburg-rueckfahrt/
 - Hamburg Backyard: https://jonasmarcuswalter.github.io/raid-radar/hamburg-backyard/
 
-## ChatGPT App Direction
+## Codex Route Builder Direction
 
-The public `/create/` page is a local-first builder: it validates a GPX in the browser, previews the route, lets the rider choose an intelligence profile, and downloads a route-request ZIP/prompt. It does not upload GPX data, store credentials, or write to GitHub. The fully automated GPX workflow will happen later in ChatGPT through the `chatgpt-app/` scaffold when the connector flow is ready.
+The public `/create/` page is a local-first Codex builder: it validates a GPX in the browser, previews the route, lets the rider choose an intelligence profile, and downloads a route-request ZIP/prompt. It does not upload GPX data, store credentials, or write to GitHub.
 
-The planned flow now lives in:
+The practical flow is:
 
-`chatgpt-app/`
+- User creates a package at https://jonasmarcuswalter.github.io/raid-radar/create/.
+- User opens their own Codex at https://chatgpt.com/codex/.
+- User connects Codex to their own GitHub repo, for example `github-user/raid-radar-routes`.
+- User unzips the downloaded package into the repo root; it creates `route-requests/pending/<request-id>/`.
+- User opens Codex for that repo and pastes `BUILD_PROMPT.md`.
+- Codex uses `jonasmarcuswalter/raid-radar` only as the public template source.
+- The GPX, generated route data, POI research, and commits stay in the user's own repo unless the user explicitly chooses public sharing.
 
-The key idea:
-
-- User opens Raid Radar inside ChatGPT.
-- User attaches a `.gpx` file.
-- The ChatGPT app validates the GPX, checks the 1000 km limit, and asks for route name, visibility, build target, and intelligence level.
-- The GPX is stored in the user's own private GitHub repo or private build storage, not in this public repo.
-- The route intelligence, POI research, and Codex build use the user's own OpenAI/Codex resource.
-- Jonas's public `raid-radar` repo stays the template/demo app, not the default storage or compute account for other people's routes.
-
-The current scaffold exposes these MCP tools for a future ChatGPT App:
+The older MCP scaffold still lives in `chatgpt-app/`, but it is not the primary user flow right now. The Codex handoff path is simpler and works with each rider's own Codex account and repo.
 
 - `validate_gpx`
 - `prepare_route_build`
@@ -61,12 +58,11 @@ Users choose an intelligence profile before build:
 - `deep`: broader POI and source checks.
 - `ultra`: highest paranoia mode for long or risky rides.
 
-No OpenAI, Codex, or GitHub write token belongs in the public browser app. Production should use ChatGPT Apps SDK authentication plus a GitHub OAuth/App install for the user's own repo, then run Codex via the user's private secrets or environment.
+No OpenAI, Codex, or GitHub write token belongs in the public browser app. Users run route builds from their own Codex workspace and GitHub repo.
 
 Official technical direction:
 
-- OpenAI Apps SDK: https://developers.openai.com/apps-sdk/
-- Apps SDK authentication: https://developers.openai.com/apps-sdk/build/auth/
+- Codex web: https://chatgpt.com/codex/
 - Codex SDK: https://developers.openai.com/codex/sdk
 - Codex non-interactive mode: https://developers.openai.com/codex/noninteractive
 - Codex GitHub Action: https://developers.openai.com/codex/github-action
@@ -79,7 +75,7 @@ The older central intake worker is still parked in:
 
 It can validate GPX and write requests into GitHub, but it is not wired into the homepage and should be treated as dev-only. It is not the target architecture for private user GPX builds because central storage would put privacy and compute responsibility on Jonas.
 
-Current limitation: a static GitHub Pages page cannot push a file directly into this Codex chat by itself because a GitHub write token cannot live safely in public browser code. The user-owned ChatGPT-App path solves that by moving writes and route intelligence into authenticated server/tool calls and private user resources.
+Current limitation: a static GitHub Pages page cannot push a file directly into Codex or GitHub by itself because a GitHub write token cannot live safely in public browser code. The current solution is the Codex handoff ZIP: the user downloads the package and runs it in their own Codex workspace.
 
 Worker source, if needed for reference:
 
