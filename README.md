@@ -26,19 +26,38 @@ Route apps:
 
 ## GPX Intake
 
-The launcher includes the first GPX intake step:
+The launcher includes a GPX intake step:
 
 - choose a `.gpx` file locally in the browser
 - validate that it is parseable and no longer than 1000 km
 - calculate route length and point count
-- copy a ready-to-send Codex prompt for creating the next Raid Radar app
+- submit it to a backend endpoint when `docs/intake-config.js` is configured
+- copy a ready-to-send Codex prompt as a fallback
 
-Current limitation: a static GitHub Pages page cannot push a file directly into this Codex chat by itself. The next automation step should be a small backend or GitHub Issue/Action flow:
+Current limitation: a static GitHub Pages page cannot push a file directly into this Codex chat by itself because a GitHub write token cannot live safely in public browser code. The repo now includes `intake-worker/`, a small backend designed to receive GPX uploads and write them into `route-requests/pending/`.
 
 1. User uploads GPX on Raid Radar.
-2. Backend stores the GPX and opens a route-build request.
+2. Intake backend stores the GPX in `route-requests/pending/<request-id>/` and opens a GitHub issue.
 3. Codex receives the request, builds the route app, researches POIs, runs subagent QA, and pushes a new `/docs/<route-slug>/` app.
 4. The launcher route list is updated.
+
+The route-request inbox is public while this repository is public. Use a private storage target before accepting sensitive home-address routes from other people.
+
+## Intake Worker
+
+Worker source:
+
+`intake-worker/src/worker.js`
+
+Configure and deploy it with:
+
+- `GITHUB_TOKEN`: fine-grained token with contents write + issues write
+- `GITHUB_OWNER`: `deinemuttersitztaufmeinemlenker`
+- `GITHUB_REPO`: `race-cockpit`
+- `GITHUB_BRANCH`: `pages`
+- `PUBLIC_ORIGIN`: `https://deinemuttersitztaufmeinemlenker.github.io`
+
+Then set `window.RAID_RADAR_INTAKE_ENDPOINT` in `docs/intake-config.js`.
 
 ## Current Builds
 

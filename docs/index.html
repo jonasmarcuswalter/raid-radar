@@ -174,7 +174,7 @@
 
       .upload-row {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 10px;
       }
 
@@ -245,6 +245,13 @@
         color: #8a3027;
       }
 
+      .intake-note {
+        margin: 0;
+        color: var(--muted);
+        font-size: 12px;
+        line-height: 1.4;
+      }
+
       .routes {
         display: grid;
         gap: 10px;
@@ -303,16 +310,18 @@
 
       <section class="section" id="upload" aria-label="GPX upload">
         <h1>Neue Route vorbereiten</h1>
-        <p class="section-copy">GPX bis 1000 km prüfen und als Codex-Auftrag vorbereiten. Der automatische Chat-Push ist der nächste Backend-Schritt; bis dahin bekommst du hier einen sauberen Auftrag zum Kopieren.</p>
+        <p class="section-copy">GPX bis 1000 km prüfen und automatisch in die Raid-Radar-Inbox schicken. Codex kann daraus die nächste Route-App bauen.</p>
         <div class="intake-box">
           <div class="upload-row">
             <label class="file-control">
               GPX auswählen
               <input id="gpxUpload" type="file" accept=".gpx,application/gpx+xml" />
             </label>
+            <button class="control" id="submitRequestButton" type="button" disabled>Route einreichen</button>
             <button class="control secondary" id="copyPromptButton" type="button" disabled>Codex-Auftrag kopieren</button>
           </div>
           <div class="upload-status" id="uploadStatus">Noch keine GPX geladen.</div>
+          <p class="intake-note" id="intakeNote"></p>
         </div>
       </section>
 
@@ -335,20 +344,34 @@
         </a>
       </section>
     </main>
+    <script src="./intake-config.js"></script>
     <script>
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker.getRegistration("./").then((registration) => registration?.unregister());
       }
 
       const MAX_GPX_KM = 1000;
+      const INTAKE_ENDPOINT = window.RAID_RADAR_INTAKE_ENDPOINT || "";
+      const GITHUB_INBOX = window.RAID_RADAR_GITHUB_INBOX || "route-requests/pending";
       const uploadInput = document.getElementById("gpxUpload");
       const uploadStatus = document.getElementById("uploadStatus");
+      const intakeNote = document.getElementById("intakeNote");
+      const submitRequestButton = document.getElementById("submitRequestButton");
       const copyPromptButton = document.getElementById("copyPromptButton");
       let preparedPrompt = "";
+      let selectedGpxFile = null;
+      let selectedGpxStats = null;
+
+      intakeNote.textContent = INTAKE_ENDPOINT
+        ? `Auto-Inbox aktiv: Uploads landen in ${GITHUB_INBOX}.`
+        : "Auto-Inbox noch nicht verbunden. Der Backend-Worker ist im Repo vorbereitet; bis zur Worker-URL bleibt Kopieren der Fallback.";
 
       uploadInput.addEventListener("change", async () => {
         const file = uploadInput.files?.[0];
         preparedPrompt = "";
+        selectedGpxFile = null;
+        selectedGpxStats = null;
+        submitRequestButton.disabled = true;
         copyPromptButton.disabled = true;
         if (!file) {
           setUploadStatus("Noch keine GPX geladen.");
@@ -371,10 +394,41 @@
             return;
           }
           preparedPrompt = buildCodexPrompt(file.name, stats);
+          selectedGpxFile = file;
+          selectedGpxStats = stats;
+          submitRequestButton.disabled = !INTAKE_ENDPOINT;
           copyPromptButton.disabled = false;
-          setUploadStatus(`<strong>${file.name}</strong>${distance} km · ${stats.points.toLocaleString("de-DE")} Punkte · bereit für Codex.`, "ok");
+          const actionText = INTAKE_ENDPOINT ? "bereit zum Einreichen" : "bereit, aber Auto-Inbox noch nicht verbunden";
+          setUploadStatus(`<strong>${file.name}</strong>${distance} km · ${stats.points.toLocaleString("de-DE")} Punkte · ${actionText}.`, INTAKE_ENDPOINT ? "ok" : "warn");
         } catch (error) {
           setUploadStatus(`<strong>GPX konnte nicht gelesen werden.</strong>${escapeHtml(error.message)}`, "error");
+        }
+      });
+
+      submitRequestButton.addEventListener("click", async () => {
+        if (!selectedGpxFile || !selectedGpxStats) return;
+        if (!INTAKE_ENDPOINT) {
+          setUploadStatus("<strong>Auto-Inbox noch nicht verbunden.</strong>Worker-URL fehlt in intake-config.js.", "warn");
+          return;
+        }
+        submitRequestButton.disabled = true;
+        copyPromptButton.disabled = true;
+        setUploadStatus(`<strong>${selectedGpxFile.name}</strong>Upload läuft in die Raid-Radar-Inbox.`, "ok");
+        try {
+          const body = new FormData();
+          body.append("gpx", selectedGpxFile, selectedGpxFile.name);
+          body.append("fileName", selectedGpxFile.name);
+          body.append("distanceKm", selectedGpxStats.km.toFixed(3));
+          body.append("pointCount", String(selectedGpxStats.points));
+          const response = await fetch(INTAKE_ENDPOINT, { method: "POST", body });
+          const payload = await response.json().catch(() => null);
+          if (!response.ok) throw new Error(payload?.error || `Upload fehlgeschlagen (${response.status})`);
+          const issueLink = payload?.issueUrl ? `<br><a href="${escapeAttribute(payload.issueUrl)}">GitHub Request öffnen</a>` : "";
+          setUploadStatus(`<strong>Route ist in der Inbox.</strong>Request ${escapeHtml(payload?.requestId || "erstellt")} · Codex kann die App bauen.${issueLink}`, "ok");
+        } catch (error) {
+          setUploadStatus(`<strong>Auto-Upload fehlgeschlagen.</strong>${escapeHtml(error.message)}`, "error");
+          submitRequestButton.disabled = false;
+          copyPromptButton.disabled = false;
         }
       });
 
@@ -438,6 +492,10 @@
           '"': "&quot;",
           "'": "&#039;",
         })[char]);
+      }
+
+      function escapeAttribute(value) {
+        return escapeHtml(String(value));
       }
     </script>
   </body>
