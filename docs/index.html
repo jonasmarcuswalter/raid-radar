@@ -42,55 +42,6 @@
         margin-bottom: 14px;
       }
 
-      .raid-mark {
-        position: relative;
-        flex: 0 0 auto;
-        width: 64px;
-        height: 64px;
-        border: 2px solid rgba(46, 107, 78, 0.92);
-        border-radius: 50%;
-        background:
-          radial-gradient(circle at center, rgba(255, 255, 255, 0.96) 0 13%, transparent 14%),
-          radial-gradient(circle at center, transparent 0 31%, rgba(46, 107, 78, 0.17) 32% 34%, transparent 35%),
-          radial-gradient(circle at center, transparent 0 58%, rgba(46, 107, 78, 0.2) 59% 62%, transparent 63%),
-          #eaf5ee;
-        box-shadow: 0 10px 28px rgba(25, 47, 37, 0.16);
-        overflow: hidden;
-      }
-
-      .raid-mark::before {
-        content: "";
-        position: absolute;
-        inset: 8px;
-        border-left: 2px solid rgba(46, 107, 78, 0.52);
-        border-top: 2px solid rgba(46, 107, 78, 0.52);
-        border-radius: 50%;
-      }
-
-      .raid-mark::after {
-        content: "";
-        position: absolute;
-        left: 50%;
-        top: 50%;
-        width: 29px;
-        height: 2px;
-        background: linear-gradient(90deg, var(--accent), rgba(46, 107, 78, 0));
-        transform: rotate(-34deg);
-        transform-origin: left center;
-      }
-
-      .raid-mark span {
-        position: absolute;
-        right: 15px;
-        top: 18px;
-        width: 9px;
-        height: 9px;
-        border: 2px solid white;
-        border-radius: 50%;
-        background: var(--accent-2);
-        box-shadow: 0 0 0 3px rgba(208, 122, 45, 0.24);
-      }
-
       .raid-logo {
         flex: 0 0 auto;
         width: 68px;
@@ -112,12 +63,6 @@
         font-size: 12px;
         font-weight: 800;
         letter-spacing: 0;
-      }
-
-      h1 {
-        margin: 0 0 14px;
-        font-size: clamp(22px, 5vw, 34px);
-        line-height: 1.08;
       }
 
       .quick-actions {
@@ -152,7 +97,7 @@
 
       .section-title {
         margin: 0 0 8px;
-        font-size: 22px;
+        font-size: 24px;
         line-height: 1.12;
       }
 
@@ -160,96 +105,7 @@
         margin: 0 0 14px;
         color: var(--muted);
         font-size: 14px;
-        line-height: 1.45;
-      }
-
-      .intake-box {
-        display: grid;
-        gap: 10px;
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        padding: 14px;
-        background: var(--panel);
-      }
-
-      .upload-row {
-        display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        gap: 10px;
-      }
-
-      .file-control,
-      button.control {
-        display: inline-flex;
-        min-height: 46px;
-        align-items: center;
-        justify-content: center;
-        border: 1px solid var(--accent);
-        border-radius: 8px;
-        padding: 0 14px;
-        background: var(--accent);
-        color: white;
-        font: inherit;
-        font-weight: 900;
-        cursor: pointer;
-      }
-
-      .file-control input {
-        position: absolute;
-        width: 1px;
-        height: 1px;
-        opacity: 0;
-        pointer-events: none;
-      }
-
-      button.control.secondary {
-        border-color: var(--line);
-        background: #f7fbf8;
-        color: var(--ink);
-      }
-
-      button.control:disabled {
-        cursor: not-allowed;
-        opacity: 0.52;
-      }
-
-      .upload-status {
-        min-height: 54px;
-        border-radius: 8px;
-        padding: 12px;
-        background: #f7fbf8;
-        color: var(--muted);
-        font-size: 13px;
-        line-height: 1.4;
-      }
-
-      .upload-status strong {
-        display: block;
-        color: var(--ink);
-        font-size: 15px;
-        line-height: 1.25;
-      }
-
-      .upload-status.ok {
-        background: #edf7f0;
-        color: #315a42;
-      }
-
-      .upload-status.warn {
-        background: #fff6e9;
-        color: #7b4b18;
-      }
-
-      .upload-status.error {
-        background: #fff0ee;
-        color: #8a3027;
-      }
-
-      .intake-note {
-        margin: 0;
-        color: var(--muted);
-        font-size: 12px;
-        line-height: 1.4;
+        line-height: 1.5;
       }
 
       .routes {
@@ -257,7 +113,8 @@
         gap: 10px;
       }
 
-      a.route {
+      a.route,
+      .about-panel {
         display: block;
         border: 1px solid var(--line);
         border-radius: 8px;
@@ -279,15 +136,34 @@
         line-height: 1.15;
       }
 
-      .route span {
+      .route span,
+      .about-panel p {
         color: var(--muted);
         font-size: 13px;
-        line-height: 1.4;
+        line-height: 1.45;
+      }
+
+      .about-panel p {
+        margin: 0;
+      }
+
+      .about-panel p + p {
+        margin-top: 10px;
+      }
+
+      .about-kicker {
+        display: inline-flex;
+        margin-bottom: 10px;
+        border-radius: 999px;
+        padding: 5px 9px;
+        background: #fff5e8;
+        color: #82480f;
+        font-size: 12px;
+        font-weight: 900;
       }
 
       @media (max-width: 560px) {
-        .quick-actions,
-        .upload-row {
+        .quick-actions {
           grid-template-columns: 1fr;
         }
       }
@@ -303,199 +179,43 @@
         </div>
       </div>
 
-      <div class="quick-actions" aria-label="Raid Radar actions">
-        <a class="action primary" href="#upload">Upload GPX</a>
-        <a class="action" href="#routes">Routes</a>
+      <div class="quick-actions" aria-label="Raid Radar navigation">
+        <a class="action primary" href="#routes">Routes</a>
+        <a class="action" href="#about">About</a>
       </div>
 
-      <section class="section" id="upload" aria-label="GPX upload">
-        <h1>Neue Route vorbereiten</h1>
-        <p class="section-copy">GPX bis 1000 km prüfen und automatisch in die Raid-Radar-Inbox schicken. Codex kann daraus die nächste Route-App bauen.</p>
-        <div class="intake-box">
-          <div class="upload-row">
-            <label class="file-control">
-              GPX auswählen
-              <input id="gpxUpload" type="file" accept=".gpx,application/gpx+xml" />
-            </label>
-            <button class="control" id="submitRequestButton" type="button" disabled>Route einreichen</button>
-            <button class="control secondary" id="copyPromptButton" type="button" disabled>Codex-Auftrag kopieren</button>
-          </div>
-          <div class="upload-status" id="uploadStatus">Noch keine GPX geladen.</div>
-          <p class="intake-note" id="intakeNote"></p>
+      <section class="section" id="routes" aria-label="Raid Radar routes">
+        <h1 class="section-title">Routes</h1>
+        <p class="section-copy">Wähle eine vorbereitete Route und öffne das Offline-Cockpit mit Karte, Standort, Next Raid und Raid Options.</p>
+        <div class="routes">
+          <a class="route" href="./zuerich-test/">
+            <strong>Zürich-Test</strong>
+            <span>Aktuelle iPhone-Test-App mit GPX, POIs, Offline-Tab und Kern-Cache.</span>
+          </a>
+          <a class="route" href="./flensburg-rueckfahrt/">
+            <strong>Raid Radar · Flensburg Rückfahrt</strong>
+            <span>Next Raid, Tankstellen-Raid und Sonntagsfallenradar für die Rückfahrt nach Flensburg.</span>
+          </a>
+          <a class="route" href="./hamburg-backyard/">
+            <strong>Hamburg Backyard</strong>
+            <span>Ultra-Pair-Route mit Hamburg-Daten als eigener App-Bereich.</span>
+          </a>
         </div>
       </section>
 
-      <section class="section" id="routes" aria-label="Raid Radar routes">
-        <h2 class="section-title">Routes</h2>
-      </section>
-
-      <section class="routes" aria-label="Raid Radar apps">
-        <a class="route" href="./zuerich-test/">
-          <strong>Zürich-Test</strong>
-          <span>Aktuelle iPhone-Test-App mit GPX, POIs, Offline-Tab und Kern-Cache.</span>
-        </a>
-        <a class="route" href="./flensburg-rueckfahrt/">
-          <strong>Raid Radar · Flensburg Rückfahrt</strong>
-          <span>Next Raid, Tankstellen-Raid und Sonntagsfallenradar für die Rückfahrt nach Flensburg.</span>
-        </a>
-        <a class="route" href="./hamburg-backyard/">
-          <strong>Hamburg Backyard</strong>
-          <span>Ultra-Pair-Route mit Hamburg-Daten als eigener App-Bereich.</span>
-        </a>
+      <section class="section" id="about" aria-label="About Raid Radar">
+        <h2 class="section-title">About</h2>
+        <article class="about-panel">
+          <span class="about-kicker">Raid Before You Bonk</span>
+          <p>Raid Radar ist ein kleines Ultracycling-Werkzeug für die entscheidende Frage unterwegs: Was kann ich als Nächstes raiden, bevor der Hungerast mich raidet?</p>
+          <p>Jede Route ist als eigene Offline-fähige App gebaut. Sie zeigt Route-km, Abstand zur Strecke, den nächsten verlässlichen Stop, Tankstellen, Supermärkte, Restaurants, Wasser und kritische Lücken.</p>
+          <p>Die App ersetzt keine Garmin- oder Wahoo-Navigation. Sie ist der zweite Bildschirm für Entscheidungen: weiterfahren, jetzt auffüllen, kurz von der Route runter oder lieber bis zur nächsten sicheren Option durchziehen.</p>
+        </article>
       </section>
     </main>
-    <script src="./intake-config.js"></script>
     <script>
       if ("serviceWorker" in navigator) {
         navigator.serviceWorker.getRegistration("./").then((registration) => registration?.unregister());
-      }
-
-      const MAX_GPX_KM = 1000;
-      const INTAKE_ENDPOINT = window.RAID_RADAR_INTAKE_ENDPOINT || "";
-      const GITHUB_INBOX = window.RAID_RADAR_GITHUB_INBOX || "route-requests/pending";
-      const uploadInput = document.getElementById("gpxUpload");
-      const uploadStatus = document.getElementById("uploadStatus");
-      const intakeNote = document.getElementById("intakeNote");
-      const submitRequestButton = document.getElementById("submitRequestButton");
-      const copyPromptButton = document.getElementById("copyPromptButton");
-      let preparedPrompt = "";
-      let selectedGpxFile = null;
-      let selectedGpxStats = null;
-
-      intakeNote.textContent = INTAKE_ENDPOINT
-        ? `Auto-Inbox aktiv: Uploads landen in ${GITHUB_INBOX}.`
-        : "Auto-Inbox noch nicht verbunden. Der Backend-Worker ist im Repo vorbereitet; bis zur Worker-URL bleibt Kopieren der Fallback.";
-
-      uploadInput.addEventListener("change", async () => {
-        const file = uploadInput.files?.[0];
-        preparedPrompt = "";
-        selectedGpxFile = null;
-        selectedGpxStats = null;
-        submitRequestButton.disabled = true;
-        copyPromptButton.disabled = true;
-        if (!file) {
-          setUploadStatus("Noch keine GPX geladen.");
-          return;
-        }
-        if (!file.name.toLowerCase().endsWith(".gpx")) {
-          setUploadStatus("<strong>Bitte eine GPX-Datei auswählen.</strong>Andere Formate nehme ich hier noch nicht an.", "error");
-          return;
-        }
-        try {
-          const text = await file.text();
-          const stats = parseGpxStats(text);
-          const distance = stats.km.toFixed(1);
-          if (stats.points < 2) {
-            setUploadStatus("<strong>GPX erkannt, aber zu wenig Punkte.</strong>Bitte prüfe, ob die Datei wirklich eine Track- oder Route-Linie enthält.", "error");
-            return;
-          }
-          if (stats.km > MAX_GPX_KM) {
-            setUploadStatus(`<strong>${file.name}</strong>${distance} km · ${stats.points.toLocaleString("de-DE")} Punkte. Aktuelles Limit: ${MAX_GPX_KM} km.`, "warn");
-            return;
-          }
-          preparedPrompt = buildCodexPrompt(file.name, stats);
-          selectedGpxFile = file;
-          selectedGpxStats = stats;
-          submitRequestButton.disabled = !INTAKE_ENDPOINT;
-          copyPromptButton.disabled = false;
-          const actionText = INTAKE_ENDPOINT ? "bereit zum Einreichen" : "bereit, aber Auto-Inbox noch nicht verbunden";
-          setUploadStatus(`<strong>${file.name}</strong>${distance} km · ${stats.points.toLocaleString("de-DE")} Punkte · ${actionText}.`, INTAKE_ENDPOINT ? "ok" : "warn");
-        } catch (error) {
-          setUploadStatus(`<strong>GPX konnte nicht gelesen werden.</strong>${escapeHtml(error.message)}`, "error");
-        }
-      });
-
-      submitRequestButton.addEventListener("click", async () => {
-        if (!selectedGpxFile || !selectedGpxStats) return;
-        if (!INTAKE_ENDPOINT) {
-          setUploadStatus("<strong>Auto-Inbox noch nicht verbunden.</strong>Worker-URL fehlt in intake-config.js.", "warn");
-          return;
-        }
-        submitRequestButton.disabled = true;
-        copyPromptButton.disabled = true;
-        setUploadStatus(`<strong>${selectedGpxFile.name}</strong>Upload läuft in die Raid-Radar-Inbox.`, "ok");
-        try {
-          const body = new FormData();
-          body.append("gpx", selectedGpxFile, selectedGpxFile.name);
-          body.append("fileName", selectedGpxFile.name);
-          body.append("distanceKm", selectedGpxStats.km.toFixed(3));
-          body.append("pointCount", String(selectedGpxStats.points));
-          const response = await fetch(INTAKE_ENDPOINT, { method: "POST", body });
-          const payload = await response.json().catch(() => null);
-          if (!response.ok) throw new Error(payload?.error || `Upload fehlgeschlagen (${response.status})`);
-          const issueLink = payload?.issueUrl ? `<br><a href="${escapeAttribute(payload.issueUrl)}">GitHub Request öffnen</a>` : "";
-          setUploadStatus(`<strong>Route ist in der Inbox.</strong>Request ${escapeHtml(payload?.requestId || "erstellt")} · Codex kann die App bauen.${issueLink}`, "ok");
-        } catch (error) {
-          setUploadStatus(`<strong>Auto-Upload fehlgeschlagen.</strong>${escapeHtml(error.message)}`, "error");
-          submitRequestButton.disabled = false;
-          copyPromptButton.disabled = false;
-        }
-      });
-
-      copyPromptButton.addEventListener("click", async () => {
-        if (!preparedPrompt) return;
-        await navigator.clipboard.writeText(preparedPrompt);
-        setUploadStatus(`${uploadStatus.innerHTML}<br>Codex-Auftrag kopiert. GPX jetzt in den Chat ziehen und Auftrag einfügen.`, "ok");
-      });
-
-      function parseGpxStats(text) {
-        const doc = new DOMParser().parseFromString(text, "application/xml");
-        const parserError = doc.querySelector("parsererror");
-        if (parserError) throw new Error("XML ist nicht parsebar.");
-        const pointNodes = [...doc.querySelectorAll("trkpt")];
-        const routeNodes = pointNodes.length ? pointNodes : [...doc.querySelectorAll("rtept")];
-        const points = routeNodes
-          .map((node) => ({
-            lat: Number(node.getAttribute("lat")),
-            lon: Number(node.getAttribute("lon")),
-          }))
-          .filter((point) => Number.isFinite(point.lat) && Number.isFinite(point.lon));
-        let meters = 0;
-        for (let index = 1; index < points.length; index += 1) {
-          meters += haversineMeters(points[index - 1], points[index]);
-        }
-        return { points: points.length, km: meters / 1000 };
-      }
-
-      function haversineMeters(a, b) {
-        const radius = 6371000;
-        const toRad = (value) => (value * Math.PI) / 180;
-        const dLat = toRad(b.lat - a.lat);
-        const dLon = toRad(b.lon - a.lon);
-        const lat1 = toRad(a.lat);
-        const lat2 = toRad(b.lat);
-        const h =
-          Math.sin(dLat / 2) ** 2 +
-          Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
-        return 2 * radius * Math.asin(Math.sqrt(h));
-      }
-
-      function buildCodexPrompt(fileName, stats) {
-        return [
-          "Bitte erstelle eine neue Raid Radar Route-App für die angehängte GPX-Datei.",
-          `Datei: ${fileName}`,
-          `Validierung auf der Raid Radar Homepage: ${stats.km.toFixed(1)} km, ${stats.points.toLocaleString("de-DE")} Punkte, unter dem aktuellen 1000-km-Limit.`,
-          "Bitte Route, POIs, Next Raid, Offline-Kartenpack, Service Worker, GitHub Pages-Unterordner und Subagent-Audit wie bei Flensburg Rückfahrt/Hamburg Backyard erzeugen.",
-        ].join("\\n");
-      }
-
-      function setUploadStatus(html, mode = "") {
-        uploadStatus.className = `upload-status ${mode}`.trim();
-        uploadStatus.innerHTML = html;
-      }
-
-      function escapeHtml(value) {
-        return value.replace(/[&<>"']/g, (char) => ({
-          "&": "&amp;",
-          "<": "&lt;",
-          ">": "&gt;",
-          '"': "&quot;",
-          "'": "&#039;",
-        })[char]);
-      }
-
-      function escapeAttribute(value) {
-        return escapeHtml(String(value));
       }
     </script>
   </body>

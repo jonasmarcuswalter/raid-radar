@@ -24,17 +24,19 @@ Route apps:
 - Flensburg Rückfahrt: https://deinemuttersitztaufmeinemlenker.github.io/race-cockpit/flensburg-rueckfahrt/
 - Hamburg Backyard: https://deinemuttersitztaufmeinemlenker.github.io/race-cockpit/hamburg-backyard/
 
-## GPX Intake
+## Parked GPX Intake
 
-The launcher includes a GPX intake step:
+GPX upload is intentionally not shown in the public launcher right now. The product stays focused on prepared route apps until the upload-to-Codex flow is ready enough to feel clean.
+
+The parked idea:
 
 - choose a `.gpx` file locally in the browser
 - validate that it is parseable and no longer than 1000 km
 - calculate route length and point count
-- submit it to a backend endpoint when `docs/intake-config.js` is configured
+- submit it to a backend endpoint when the public config is reintroduced
 - copy a ready-to-send Codex prompt as a fallback
 
-Current limitation: a static GitHub Pages page cannot push a file directly into this Codex chat by itself because a GitHub write token cannot live safely in public browser code. The repo now includes `intake-worker/`, a small backend designed to receive GPX uploads and write them into `route-requests/pending/`.
+Current limitation: a static GitHub Pages page cannot push a file directly into this Codex chat by itself because a GitHub write token cannot live safely in public browser code. The repo keeps `intake-worker/` as a hidden scaffold for later, but it is not wired into the homepage.
 
 1. User uploads GPX on Raid Radar.
 2. Intake backend stores the GPX in `route-requests/pending/<request-id>/` and opens a GitHub issue.
@@ -57,7 +59,7 @@ Configure and deploy it with:
 - `GITHUB_BRANCH`: `pages`
 - `PUBLIC_ORIGIN`: `https://deinemuttersitztaufmeinemlenker.github.io`
 
-Then set `window.RAID_RADAR_INTAKE_ENDPOINT` in `docs/intake-config.js`.
+If this feature returns later, add a public config file with `window.RAID_RADAR_INTAKE_ENDPOINT`.
 
 ## Current Builds
 
