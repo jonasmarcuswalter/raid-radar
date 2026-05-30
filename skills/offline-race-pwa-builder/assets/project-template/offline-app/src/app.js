@@ -23,6 +23,17 @@ const CORE_OFFLINE_ASSETS = [
   "./assets/icon-512.png",
   "./assets/apple-touch-icon.png",
 ];
+const MAP_PACK_STYLE = {
+  motorway: { color: "#d27b38", weight: 3.5, opacity: 0.82 },
+  major: { color: "#d49a4a", weight: 2.9, opacity: 0.78 },
+  medium: { color: "#c5aa70", weight: 2.2, opacity: 0.74 },
+  minor: { color: "#c9c9b5", weight: 1.5, opacity: 0.7 },
+  path: { color: "#8fa777", weight: 1.2, opacity: 0.68, dashArray: "5 5" },
+  railway: { color: "#8f8f94", weight: 1.3, opacity: 0.58, dashArray: "6 5" },
+  waterway: { color: "#75b7c8", weight: 1.5, opacity: 0.78 },
+  water: { color: "#75b7c8", weight: 1, fillColor: "#bde4ec", fillOpacity: 0.46, opacity: 0.8 },
+  place: { color: "#75867c", weight: 1, opacity: 0.72 },
+};
 
 const state = {
   route: null,
@@ -42,6 +53,7 @@ const state = {
   visited: new Set(JSON.parse(localStorage.getItem("visited") || "[]")),
   markerImage: new Image(),
   leaflet: null,
+  mapPack: null,
   offline: {
     mapPack: { status: "missing" },
     lastCheck: localStorage.getItem(LAST_OFFLINE_CHECK_KEY) || "",
@@ -105,6 +117,7 @@ async function init() {
   state.meta = meta;
   state.offline.mapPack = loadMapPackStatus();
   configureAppShell();
+  await loadOfflineMapPack({ quiet: true });
   setupLeafletMap();
   const firstDemo = getDemoPositions()[0] || { label: "Start", km: 0 };
   setDemoPosition(firstDemo.km, `Demo ${firstDemo.label}`);
@@ -229,6 +242,7 @@ function configureAppShell() {
 function basemapLabel(status) {
   if (status === "online-osm") return "Online OSM basemap · Route/POIs cached";
   if (status === "pmtiles") return "Offline PMTiles basemap";
+  if (status === "corridor-vector") return "Offline corridor map · Route/POIs cached";
   return `Offline schematic basemap · ${status === "pending" ? "PMTiles pending" : status}`;
 }
 
@@ -247,8 +261,12 @@ function setupLeafletMap() {
       attribution: "&copy; OpenStreetMap contributors",
     }).addTo(map);
   } else if (els.mapHint) {
-    els.mapHint.textContent = "Offline: Route/POIs ohne Basemap · PMTiles pending";
+    els.mapHint.textContent = state.mapPack ? "Offline-Kartenpack aktiv · ohne Online-Tiles" : "Offline: Route/POIs ohne Basemap";
   }
+  map.createPane("offlineMapPane");
+  map.getPane("offlineMapPane").style.zIndex = 350;
+  const offlineMapLayer = L.layerGroup().addTo(map);
+  renderLeafletMapPack(offlineMapLayer);
   const routeLatLngs = state.route.points.map(([lat, lon]) => [lat, lon]);
   const routeLine = L.polyline(routeLatLngs, {
     color: "#2e6b4e",
@@ -270,7 +288,7 @@ function setupLeafletMap() {
       .addTo(milestoneLayer);
   }
   map.fitBounds(routeLine.getBounds(), { padding: [24, 24] });
-  state.leaflet = { map, routeLine, milestoneLayer, poiLayer, detourLayer, riderMarker: null, accuracyCircle: null };
+  state.leaflet = { map, routeLine, milestoneLayer, poiLayer, detourLayer, offlineMapLayer, riderMarker: null, accuracyCircle: null };
   requestAnimationFrame(() => map.invalidateSize());
 }
 
@@ -286,6 +304,83 @@ function getDemoPositions() {
     label: pos.label,
     km: Math.max(0, Math.min(Number(pos.km) || 0, total)),
   }));
+}
+
+function configuredMapPackUrl() {
+  return state.meta?.offline_map_pack?.url || "";
+}
+
+function coreOfflineAssets() {
+  const mapPackUrl = configuredMapPackUrl();
+  return mapPackUrl ? [...CORE_OFFLINE_ASSETS, mapPackUrl] : [...CORE_OFFLINE_ASSETS];
+}
+
+async function loadOfflineMapPack({ quiet = false, force = false } = {}) {
+  const url = configuredMapPackUrl();
+  if (!url) return null;
+  try {
+    const response = await fetch(url, { cache: force ? "reload" : "default", credentials: "same-origin" });
+    if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+    state.mapPack = await response.json();
+    if (els.mapHint && state.meta?.basemap?.status === "corridor-vector") {
+      els.mapHint.textContent = "Offline corridor map · Route/POIs cached";
+    }
+    if (state.leaflet?.offlineMapLayer) {
+      renderLeafletMapPack(state.leaflet.offlineMapLayer);
+      state.leaflet.map.invalidateSize();
+    }
+    drawMap();
+    return state.mapPack;
+  } catch (error) {
+    if (!quiet) logStatus(`Kartenpack konnte nicht geladen werden: ${error.message}`);
+    state.mapPack = null;
+    return null;
+  }
+}
+
+function renderLeafletMapPack(layer) {
+  if (!window.L || !layer || !state.mapPack?.features?.length) return;
+  layer.clearLayers();
+  const maxFeatures = 6000;
+  for (const feature of state.mapPack.features.slice(0, maxFeatures)) {
+    const style = leafletMapPackStyle(feature);
+    if (feature.type === "point") {
+      L.circleMarker([feature.lat, feature.lon], {
+        pane: "offlineMapPane",
+        radius: feature.kind === "place" ? 3 : 2,
+        color: style.color,
+        weight: 1,
+        fillColor: style.color,
+        fillOpacity: 0.55,
+        opacity: style.opacity,
+        interactive: false,
+      }).addTo(layer);
+      continue;
+    }
+    const latLngs = (feature.points || []).map(([lat, lon]) => [lat, lon]);
+    if (latLngs.length < 2) continue;
+    if (feature.type === "polygon" && latLngs.length >= 4) {
+      L.polygon(latLngs, { ...style, pane: "offlineMapPane", interactive: false }).addTo(layer);
+    } else {
+      L.polyline(latLngs, { ...style, pane: "offlineMapPane", interactive: false }).addTo(layer);
+    }
+  }
+}
+
+function leafletMapPackStyle(feature) {
+  const style = mapPackStyle(feature);
+  return {
+    color: style.color,
+    weight: style.weight,
+    opacity: style.opacity,
+    dashArray: style.dashArray,
+    fillColor: style.fillColor,
+    fillOpacity: style.fillOpacity,
+  };
+}
+
+function mapPackStyle(feature) {
+  return MAP_PACK_STYLE[feature.kind] || MAP_PACK_STYLE.minor;
 }
 
 function activateTab(tabName) {
@@ -663,9 +758,10 @@ async function cacheCoreAssets() {
   els.cacheCoreButton.textContent = "Speichere...";
   let ok = 0;
   const failures = [];
+  const assets = coreOfflineAssets();
   try {
     const cache = await caches.open(MANUAL_CACHE_NAME);
-    for (const url of CORE_OFFLINE_ASSETS) {
+    for (const url of assets) {
       try {
         const response = await fetch(url, { cache: "reload", credentials: "same-origin" });
         if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
@@ -679,11 +775,12 @@ async function cacheCoreAssets() {
     els.cacheCoreButton.disabled = false;
     els.cacheCoreButton.textContent = "Kern offline speichern";
   }
+  await loadOfflineMapPack({ quiet: true });
   const snapshot = await checkOfflineReadiness({ quiet: true });
   logStatus(
     failures.length
-      ? `Kern-Cache: ${ok}/${CORE_OFFLINE_ASSETS.length} gespeichert.\n${failures.join("\n")}`
-      : `Kern-Cache: ${ok}/${CORE_OFFLINE_ASSETS.length} Dateien gespeichert.`,
+      ? `Kern-Cache: ${ok}/${assets.length} gespeichert.\n${failures.join("\n")}`
+      : `Kern-Cache: ${ok}/${assets.length} Dateien gespeichert.`,
   );
   state.offline.snapshot = snapshot;
   renderOfflinePanel();
@@ -691,9 +788,13 @@ async function cacheCoreAssets() {
 
 async function checkOfflineReadiness({ quiet = false } = {}) {
   const checkedAt = new Date().toISOString();
-  const core = await checkCacheUrls(CORE_OFFLINE_ASSETS);
+  const core = await checkCacheUrls(coreOfflineAssets());
   const storage = await storageEstimate();
-  const mapPack = normalizeMapPackStatus();
+  const mapPackUrl = configuredMapPackUrl();
+  const mapPack = normalizeMapPackStatus({
+    cached: Boolean(mapPackUrl && core.cached.has(mapPackUrl)),
+    loaded: Boolean(state.mapPack),
+  });
   const serviceWorkerSupported = "serviceWorker" in navigator;
   const snapshot = {
     checkedAt,
@@ -752,7 +853,7 @@ async function storageEstimate() {
   }
 }
 
-function normalizeMapPackStatus() {
+function normalizeMapPackStatus({ cached = false, loaded = false } = {}) {
   const configured = state.meta?.offline_map_pack || {};
   if (!configured.url) {
     return {
@@ -762,23 +863,29 @@ function normalizeMapPackStatus() {
     };
   }
   const savedStatus = state.offline.mapPack?.status || "available";
-  const status = savedStatus === "cached" && !isMapPackRenderable(configured) ? "stored" : savedStatus;
+  const impliedStatus = cached && isMapPackRenderable(configured) ? "cached" : savedStatus;
+  const status = impliedStatus === "cached" && !isMapPackRenderable(configured) ? "stored" : impliedStatus;
   return {
     status,
     label: configured.label || "Offline-Kartenpack",
     url: configured.url,
     size: state.offline.mapPack?.size || configured.expected_size_mb || null,
     note:
-      status === "stored"
+      status === "cached" && loaded
+        ? "Offline-Kartenpack ist gecached und als Basemap aktiv."
+        : status === "cached"
+          ? "Offline-Kartenpack ist gecached und wird beim nächsten Laden angezeigt."
+          : status === "stored"
         ? "Kartenpack ist gespeichert; die Basemap-Anzeige folgt mit dem PMTiles-Renderer."
         : state.offline.mapPack?.note || configured.note || "Kartenpack kann lokal gespeichert werden.",
     updatedAt: state.offline.mapPack?.updatedAt || "",
     renderable: isMapPackRenderable(configured),
+    loaded,
   };
 }
 
 function isMapPackRenderable(configured = state.meta?.offline_map_pack || {}) {
-  return ["leaflet-pmtiles", "pmtiles-leaflet"].includes(configured.renderer || configured.display || "");
+  return ["corridor-vector", "leaflet-pmtiles", "pmtiles-leaflet"].includes(configured.renderer || configured.display || "");
 }
 
 async function downloadMapPack() {
@@ -804,6 +911,7 @@ async function downloadMapPack() {
     if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
     const cache = await caches.open(MANUAL_CACHE_NAME);
     await cache.put(configured.url, response.clone());
+    await loadOfflineMapPack({ quiet: true });
     const length = response.headers.get("content-length");
     const renderable = isMapPackRenderable(configured);
     saveMapPackStatus({
@@ -812,7 +920,7 @@ async function downloadMapPack() {
       size: length ? Number(length) : configured.expected_size_mb || null,
       updatedAt: new Date().toISOString(),
       note: renderable
-        ? "PMTiles-Kartenpack ist im Browser-Cache gespeichert und als Basemap vorbereitet."
+        ? "Offline-Kartenpack ist im Browser-Cache gespeichert und als Basemap aktiv."
         : "PMTiles-Kartenpack ist gespeichert; die Anzeige als Basemap folgt mit dem PMTiles-Renderer.",
     });
     logStatus(renderable ? "Kartenpack gespeichert." : "Kartenpack gespeichert, Basemap-Renderer noch nicht aktiv.");
@@ -833,8 +941,9 @@ async function downloadMapPack() {
 
 function renderOfflinePanel(snapshot = state.offline.snapshot) {
   if (!els.offlineSummary || !els.offlineStatusGrid) return;
-  const mapPack = normalizeMapPackStatus();
-  const core = snapshot?.core || { total: CORE_OFFLINE_ASSETS.length, cachedCount: 0, missing: CORE_OFFLINE_ASSETS, cached: new Set() };
+  const mapPack = snapshot?.mapPack || normalizeMapPackStatus({ loaded: Boolean(state.mapPack) });
+  const expectedAssets = coreOfflineAssets();
+  const core = snapshot?.core || { total: expectedAssets.length, cachedCount: 0, missing: expectedAssets, cached: new Set() };
   const serviceWorkerReady = snapshot?.serviceWorker?.supported && snapshot?.serviceWorker?.controlled;
   const mapPackUsable = mapPack.status === "cached" && mapPack.renderable;
   const ready =
@@ -916,11 +1025,52 @@ function drawMap() {
   const viewport = getViewport(width, height);
 
   drawBackground(ctx, width, height);
+  drawOfflineMapPack(ctx, viewport);
   drawRoute(ctx, viewport);
   drawMilestones(ctx, viewport);
   drawPois(ctx, viewport);
   drawSelectedDetour(ctx, viewport);
   drawRider(ctx, viewport);
+}
+
+function drawOfflineMapPack(ctx, viewport) {
+  if (!state.mapPack?.features?.length) return;
+  ctx.save();
+  for (const feature of state.mapPack.features.slice(0, 6000)) {
+    const style = mapPackStyle(feature);
+    ctx.globalAlpha = style.opacity ?? 0.7;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    if (feature.type === "point") {
+      const p = viewport.project(feature.lat, feature.lon);
+      ctx.fillStyle = style.color;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, feature.kind === "place" ? 2.5 : 1.8, 0, Math.PI * 2);
+      ctx.fill();
+      continue;
+    }
+    const points = feature.points || [];
+    if (points.length < 2) continue;
+    ctx.beginPath();
+    points.forEach(([lat, lon], index) => {
+      const p = viewport.project(lat, lon);
+      if (index === 0) ctx.moveTo(p.x, p.y);
+      else ctx.lineTo(p.x, p.y);
+    });
+    if (feature.type === "polygon" && points.length >= 4) {
+      ctx.fillStyle = style.fillColor || style.color;
+      ctx.globalAlpha = style.fillOpacity ?? 0.35;
+      ctx.fill();
+      ctx.globalAlpha = style.opacity ?? 0.7;
+    }
+    ctx.strokeStyle = style.color;
+    ctx.lineWidth = style.weight || 1;
+    if (style.dashArray) ctx.setLineDash(style.dashArray.split(" ").map(Number));
+    else ctx.setLineDash([]);
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+  ctx.restore();
 }
 
 function updateLeafletMap() {

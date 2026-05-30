@@ -20,6 +20,7 @@ APP_DIR = ROOT / "offline-app"
 DIST_DIR = APP_DIR / "dist"
 DATA_DIR = APP_DIR / "data"
 ASSET_DIR = APP_DIR / "assets"
+MAP_DIR = APP_DIR / "maps"
 
 DEFAULT_GPX = ROOT / "routes" / "hamburg-backyard-2026-ultra-draft.gpx"
 DEFAULT_VERIFIED = ROOT / "data" / "ultra_verified_resupply.csv"
@@ -454,6 +455,7 @@ def build(args: argparse.Namespace) -> dict:
     (DIST_DIR / "src").mkdir(parents=True, exist_ok=True)
     (DIST_DIR / "assets").mkdir(parents=True, exist_ok=True)
     (DIST_DIR / "data").mkdir(parents=True, exist_ok=True)
+    (DIST_DIR / "maps").mkdir(parents=True, exist_ok=True)
     (DIST_DIR / "vendor").mkdir(parents=True, exist_ok=True)
 
     for name in ["route.json", "pois.json", "gaps.json", "segments.json", "app-meta.json"]:
@@ -473,6 +475,10 @@ def build(args: argparse.Namespace) -> dict:
         copy_tree_file(ASSET_DIR / name, DIST_DIR / "assets" / name)
     if (APP_DIR / "vendor").exists():
         shutil.copytree(APP_DIR / "vendor", DIST_DIR / "vendor", dirs_exist_ok=True)
+    map_pack_assets = []
+    if (MAP_DIR / "corridor-map.json").exists():
+        copy_tree_file(MAP_DIR / "corridor-map.json", DIST_DIR / "maps" / "corridor-map.json")
+        map_pack_assets.append("./maps/corridor-map.json")
 
     assets = [
         "./",
@@ -495,7 +501,7 @@ def build(args: argparse.Namespace) -> dict:
         "./assets/icon-192.png",
         "./assets/icon-512.png",
         "./assets/apple-touch-icon.png",
-    ]
+    ] + map_pack_assets
     cache_prefix = config.get("cache_prefix") or f"{slugify(app_name)}-offline-v1-"
     cache_name = cache_prefix + build_time.replace(":", "").replace("+", "z")
     rendered_sw = render_sw(cache_name, cache_prefix, assets)

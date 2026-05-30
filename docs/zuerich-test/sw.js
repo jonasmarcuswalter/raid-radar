@@ -1,4 +1,4 @@
-const CACHE_NAME = "zuerich-test-offline-v1-2026-05-30T174500z0000";
+const CACHE_NAME = "zuerich-test-offline-v1-2026-05-30T181800z0000";
 const CACHE_PREFIX = "zuerich-test-offline-v1-";
 const ASSETS = [
   "./",
@@ -16,6 +16,7 @@ const ASSETS = [
   "./data/gaps.json",
   "./data/segments.json",
   "./data/app-meta.json",
+  "./maps/corridor-map.json",
   "./assets/rider-marker.png",
   "./assets/rider-marker@2x.png",
   "./assets/icon-192.png",

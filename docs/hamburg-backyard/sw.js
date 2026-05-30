@@ -1,4 +1,4 @@
-const CACHE_NAME = "hamburg-backyard-offline-v1-2026-05-30T174500z0000";
+const CACHE_NAME = "hamburg-backyard-offline-v1-2026-05-30T181500z0000";
 const CACHE_PREFIX = "hamburg-backyard-offline-v1-";
 const ASSETS = [
   "./",

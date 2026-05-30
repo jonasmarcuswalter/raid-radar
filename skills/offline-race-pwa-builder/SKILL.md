@@ -32,17 +32,45 @@ description: Build, regenerate, test, and deploy reusable offline race-cockpit P
      --config data/<app-config>.json
    ```
 
-4. Start a local server from `offline-app/dist` and test the app before changing deployment files.
+4. Optional but recommended: build the offline corridor map pack after the first app build has produced `offline-app/data/route.json`:
 
-5. For iPhone/GPS/PWA testing, use HTTPS. Prefer GitHub Pages for stable testing; use a temporary Cloudflare tunnel only for development.
+   ```bash
+   python3 scripts/build_corridor_map_pack.py \
+     --route-json offline-app/data/route.json \
+     --output offline-app/maps/corridor-map.json \
+     --radius-km 1.0 \
+     --chunk-km 8
+   ```
 
-6. Prepare GitHub Pages output:
+   Then rerun `scripts/build_offline_app.py` with a config containing:
+
+   ```json
+   {
+     "basemap": {
+       "status": "corridor-vector",
+       "note": "Offline OSM vector corridor pack is included."
+     },
+     "offline_map_pack": {
+       "status": "available",
+       "label": "Offline Route-Korridor",
+       "url": "./maps/corridor-map.json",
+       "renderer": "corridor-vector",
+       "note": "Offline-Kartenpack mit lokalen OSM-Vektorlinien."
+     }
+   }
+   ```
+
+5. Start a local server from `offline-app/dist` and test the app before changing deployment files.
+
+6. For iPhone/GPS/PWA testing, use HTTPS. Prefer GitHub Pages for stable testing; use a temporary Cloudflare tunnel only for development.
+
+7. Prepare GitHub Pages output:
 
    ```bash
    python3 <skill>/scripts/prepare_github_pages.py --project <workspace> --docs docs --force
    ```
 
-7. Validate:
+8. Validate:
 
    - `node --check offline-app/src/app.js`
    - `node --check offline-app/dist/sw.js`
@@ -58,6 +86,7 @@ The bundled `assets/project-template/` contains:
 - Leaflet online basemap for development and route inspection
 - Service worker caching for app shell, route JSON, POIs, marker, icons, and map libraries
 - In-app Offline tab with manual core caching, readiness checks, browser storage estimate, and PMTiles pack placeholder
+- Offline corridor map-pack renderer for `maps/corridor-map.json`
 - GPX/POI generator scripts in `scripts/`
 - Rider photo marker assets
 - GitHub Pages preparation helper
@@ -92,15 +121,16 @@ Key rule: GitHub visibility is repository-level. A branch cannot be public if th
 
 ## Offline Map Pack
 
-For production race use, add a PMTiles corridor pack instead of bulk-caching OSM raster tiles.
+For production race use, use either the built-in `corridor-map.json` vector pack or add a PMTiles corridor pack instead of bulk-caching OSM raster tiles.
 
 Recommended implementation path:
 
 1. Keep online Leaflet/OSM basemap for quick development.
-2. Generate a route-corridor PMTiles file for the final route.
-3. Add an in-app `Offline-Kartenpack laden` control.
-4. Store the PMTiles pack in browser storage/OPFS where supported.
-5. Display explicit readiness state and require a final airplane-mode test.
+2. For near-term sharing, generate `offline-app/maps/corridor-map.json` from Overpass with `scripts/build_corridor_map_pack.py`.
+3. For heavier production maps, generate a route-corridor PMTiles file for the final route.
+4. Add or reuse the in-app `Offline-Kartenpack laden` control.
+5. Store the map pack in browser storage/OPFS or Cache API where supported.
+6. Display explicit readiness state and require a final airplane-mode test.
 
 ## Race-Day Positioning
 
