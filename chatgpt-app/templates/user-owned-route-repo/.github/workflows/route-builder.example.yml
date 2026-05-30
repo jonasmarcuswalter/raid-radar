@@ -1,0 +1,44 @@
+# Example only. Copy to route-builder.yml after choosing the exact Codex runner setup.
+#
+# This workflow is intentionally not installed as an active workflow by the template
+# because Codex Action/CLI credentials and permissions must be configured by the
+# route owner first.
+name: Raid Radar Route Builder
+
+on:
+  issues:
+    types: [opened, labeled]
+  workflow_dispatch:
+    inputs:
+      request_id:
+        description: Route request id under route-requests/pending/
+        required: true
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  build-route:
+    if: contains(github.event.issue.labels.*.name, 'route-request') || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Confirm user-owned OpenAI resource
+        run: |
+          test -n "${OPENAI_API_KEY:-${CODEX_API_KEY:-}}" || {
+            echo "Configure OPENAI_API_KEY or CODEX_API_KEY as a private repo secret first."
+            exit 1
+          }
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          CODEX_API_KEY: ${{ secrets.CODEX_API_KEY }}
+
+      - name: Run Codex route builder
+        run: |
+          echo "Install/run the chosen Codex Action, CLI, or SDK command here."
+          echo "Read route-requests/pending/<request-id>/request.json and BUILD_PROMPT.md."
+          echo "Build the Raid Radar route app from the public template without leaking private GPX data."
+

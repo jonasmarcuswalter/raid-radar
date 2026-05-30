@@ -1,0 +1,19 @@
+{
+  "name": "@raid-radar/chatgpt-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "ChatGPT Apps SDK / MCP scaffold for user-owned Raid Radar GPX route builds.",
+  "scripts": {
+    "start": "node src/server.js",
+    "check": "node --check src/server.js && node --test",
+    "test": "node --test"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/ext-apps": "^1.7.2",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {}
+}
+

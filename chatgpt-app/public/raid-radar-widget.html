@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #08100f;
+        --panel: #10201d;
+        --panel-2: #142b27;
+        --text: #eef8ef;
+        --muted: #9db3aa;
+        --line: rgba(209, 255, 225, 0.16);
+        --lime: #b8ff5c;
+        --amber: #ffd166;
+        --red: #ff6b6b;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+      .shell {
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 18px;
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--line);
+      }
+      .radar {
+        width: 52px;
+        height: 52px;
+        border: 2px solid var(--lime);
+        border-radius: 50%;
+        position: relative;
+        background:
+          radial-gradient(circle at center, transparent 0 20%, rgba(184, 255, 92, 0.18) 21% 22%, transparent 23% 45%, rgba(184, 255, 92, 0.16) 46% 47%, transparent 48%),
+          conic-gradient(from 310deg, rgba(184, 255, 92, 0.65), rgba(184, 255, 92, 0.06) 42deg, transparent 70deg);
+      }
+      .radar::before, .radar::after {
+        content: "";
+        position: absolute;
+        inset: 50% auto auto 50%;
+        width: 23px;
+        height: 2px;
+        background: var(--lime);
+        transform-origin: left center;
+      }
+      .radar::before { transform: rotate(0deg); }
+      .radar::after { transform: rotate(90deg); }
+      h1 {
+        margin: 0;
+        font-size: 26px;
+        letter-spacing: 0;
+      }
+      .claim {
+        margin: 2px 0 0;
+        color: var(--lime);
+        font-weight: 700;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 16px;
+      }
+      label {
+        display: grid;
+        gap: 6px;
+        color: var(--muted);
+        font-size: 13px;
+      }
+      input, select, textarea {
+        width: 100%;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: var(--panel);
+        color: var(--text);
+        padding: 10px 11px;
+        font: inherit;
+      }
+      textarea {
+        min-height: 78px;
+        resize: vertical;
+      }
+      .wide { grid-column: 1 / -1; }
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 14px;
+      }
+      button {
+        border: 0;
+        border-radius: 8px;
+        padding: 10px 14px;
+        background: var(--lime);
+        color: #10200e;
+        font-weight: 800;
+        cursor: pointer;
+      }
+      button.secondary {
+        background: var(--panel-2);
+        color: var(--text);
+        border: 1px solid var(--line);
+      }
+      .status {
+        margin-top: 16px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 12px;
+        background: var(--panel);
+        min-height: 96px;
+      }
+      .pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 8px;
+        border-radius: 999px;
+        background: rgba(184, 255, 92, 0.13);
+        color: var(--lime);
+        font-size: 12px;
+        font-weight: 800;
+      }
+      .warning { color: var(--amber); }
+      .error { color: var(--red); }
+      .small {
+        color: var(--muted);
+        font-size: 13px;
+        line-height: 1.45;
+      }
+      pre {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        margin: 10px 0 0;
+        color: var(--muted);
+      }
+      @media (max-width: 640px) {
+        .grid { grid-template-columns: 1fr; }
+        .shell { padding: 14px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="brand">
+        <div class="radar" aria-hidden="true"></div>
+        <div>
+          <h1>Raid Radar</h1>
+          <p class="claim">Raid Before You Bonk</p>
+        </div>
+      </header>
+
+      <section class="grid" aria-label="Route request form">
+        <label class="wide">
+          GPX-Datei
+          <input id="gpxFile" type="file" accept=".gpx,application/gpx+xml,text/xml" />
+        </label>
+        <label>
+          Routenname
+          <input id="routeName" type="text" placeholder="Flensburg Rückfahrt" />
+        </label>
+        <label>
+          User-Repo
+          <input id="repo" type="text" placeholder="github-user/raid-radar-routes" />
+        </label>
+        <label>
+          Sichtbarkeit
+          <select id="visibility">
+            <option value="private">Private Route</option>
+            <option value="unlisted">Unlisted share link</option>
+            <option value="public">Public share route</option>
+          </select>
+        </label>
+        <label>
+          Intelligence
+          <select id="intelligence">
+            <option value="balanced">Balanced raid radar</option>
+            <option value="fast">Fast raid scan</option>
+            <option value="deep">Deep raid research</option>
+            <option value="ultra">Ultra paranoia mode</option>
+          </select>
+        </label>
+        <label>
+          Build-Ziel
+          <select id="buildTarget">
+            <option value="codex_github_action">Codex GitHub Action</option>
+            <option value="guided_handoff">Guided Codex handoff</option>
+            <option value="codex_cli">Codex CLI</option>
+            <option value="codex_sdk">Codex SDK</option>
+          </select>
+        </label>
+        <label class="wide">
+          Notizen
+          <textarea id="notes" placeholder="Datum, Startzeit, besondere Sonntagslogik, Lieblingsstopps, No-Gos..."></textarea>
+        </label>
+      </section>
+
+      <div class="actions">
+        <button id="validate">GPX checken</button>
+        <button id="prepare" class="secondary">Build vorbereiten</button>
+      </div>
+
+      <section class="status" aria-live="polite">
+        <span class="pill">User-owned OpenAI resource</span>
+        <p class="small">
+          Diese Komponente speichert keine OpenAI-Keys im Browser. Für echte Builds kommen OpenAI/Codex-Secrets in das private User-Repo oder in dessen Codex-Umgebung.
+        </p>
+        <pre id="output">Wähle eine GPX aus und starte den Check.</pre>
+      </section>
+    </main>
+
+    <script>
+      const $ = (id) => document.getElementById(id);
+      const output = $("output");
+      let lastValidation = null;
+
+      $("validate").addEventListener("click", async () => {
+        const file = $("gpxFile").files[0];
+        if (!file) return show("Erst GPX auswählen.", "error");
+        const text = await file.text();
+        const stats = parseGpx(text);
+        const errors = [];
+        if (!file.name.toLowerCase().endsWith(".gpx")) errors.push("Datei muss .gpx sein.");
+        if (stats.pointCount < 2) errors.push("Zu wenige Trackpunkte.");
+        if (stats.routeKm > 1000) errors.push(`Route ist ${stats.routeKm.toFixed(1)} km; Limit 1000 km.`);
+        lastValidation = { ok: errors.length === 0, fileName: file.name, stats, errors };
+        show(JSON.stringify(lastValidation, null, 2), errors.length ? "error" : "");
+        if (!$("routeName").value) $("routeName").value = file.name.replace(/\.gpx$/i, "");
+      });
+
+      $("prepare").addEventListener("click", async () => {
+        if (!lastValidation) return show("Bitte zuerst GPX checken.", "error");
+        const payload = {
+          routeName: $("routeName").value || lastValidation.fileName.replace(/\.gpx$/i, ""),
+          fileName: lastValidation.fileName,
+          visibility: $("visibility").value,
+          targetRepository: $("repo").value || null,
+          intelligence: $("intelligence").value,
+          buildTarget: $("buildTarget").value,
+          notes: $("notes").value,
+          stats: lastValidation.stats,
+          openaiResource: "user-owned",
+        };
+        show(JSON.stringify(payload, null, 2));
+      });
+
+      function parseGpx(text) {
+        const regex = /<(trkpt|rtept)\b([^>]*)>/gi;
+        const points = [];
+        let match;
+        while ((match = regex.exec(text))) {
+          const attrs = match[2];
+          const lat = Number((attrs.match(/\blat=["']([^"']+)["']/i) || [])[1]);
+          const lon = Number((attrs.match(/\blon=["']([^"']+)["']/i) || [])[1]);
+          if (Number.isFinite(lat) && Number.isFinite(lon)) points.push({ lat, lon });
+        }
+        let meters = 0;
+        for (let i = 1; i < points.length; i += 1) meters += haversine(points[i - 1], points[i]);
+        return {
+          pointCount: points.length,
+          routeKm: Math.round((meters / 1000) * 1000) / 1000,
+          start: points[0] || null,
+          finish: points[points.length - 1] || null,
+        };
+      }
+
+      function haversine(a, b) {
+        const radius = 6371000;
+        const rad = (value) => value * Math.PI / 180;
+        const dLat = rad(b.lat - a.lat);
+        const dLon = rad(b.lon - a.lon);
+        const h = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLon / 2) ** 2;
+        return 2 * radius * Math.asin(Math.sqrt(h));
+      }
+
+      function show(text, kind = "") {
+        output.className = kind;
+        output.textContent = text;
+      }
+    </script>
+  </body>
+</html>
+

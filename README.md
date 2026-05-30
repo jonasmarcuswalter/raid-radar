@@ -24,30 +24,60 @@ Route apps:
 - Flensburg Rückfahrt: https://jonasmarcuswalter.github.io/raid-radar/flensburg-rueckfahrt/
 - Hamburg Backyard: https://jonasmarcuswalter.github.io/raid-radar/hamburg-backyard/
 
-## Parked GPX Intake
+## ChatGPT App Direction
 
-GPX upload is intentionally not shown in the public launcher right now. The product stays focused on prepared route apps until the upload-to-Codex flow is ready enough to feel clean.
+GPX upload is intentionally not shown in the public launcher right now. The product stays focused on prepared route apps until the user-owned ChatGPT/Codex flow is ready enough to feel clean.
 
-The parked idea:
+The planned flow now lives in:
 
-- choose a `.gpx` file locally in the browser
-- validate that it is parseable and no longer than 1000 km
-- calculate route length and point count
-- submit it to a backend endpoint when the public config is reintroduced
-- copy a ready-to-send Codex prompt as a fallback
+`chatgpt-app/`
 
-Current limitation: a static GitHub Pages page cannot push a file directly into this Codex chat by itself because a GitHub write token cannot live safely in public browser code. The repo keeps `intake-worker/` as a hidden scaffold for later, but it is not wired into the homepage.
+The key idea:
 
-1. User uploads GPX on Raid Radar.
-2. Intake backend stores the GPX in `route-requests/pending/<request-id>/` and opens a GitHub issue.
-3. Codex receives the request, builds the route app, researches POIs, runs subagent QA, and pushes a new `/docs/<route-slug>/` app.
-4. The launcher route list is updated.
+- User opens Raid Radar inside ChatGPT.
+- User attaches a `.gpx` file.
+- The ChatGPT app validates the GPX, checks the 1000 km limit, and asks for route name, visibility, build target, and intelligence level.
+- The GPX is stored in the user's own private GitHub repo or private build storage, not in this public repo.
+- The route intelligence, POI research, and Codex build use the user's own OpenAI/Codex resource.
+- Jonas's public `raid-radar` repo stays the template/demo app, not the default storage or compute account for other people's routes.
 
-The route-request inbox is public while this repository is public. Use a private storage target before accepting sensitive home-address routes from other people.
+The current scaffold exposes these MCP tools for a future ChatGPT App:
 
-## Intake Worker
+- `validate_gpx`
+- `prepare_route_build`
+- `connect_github`
+- `connect_openai`
+- `create_route_request`
+- `check_build_status`
 
-Worker source:
+Users choose an intelligence profile before build:
+
+- `fast`: quick and cheaper, sparse raid-stop scan.
+- `balanced`: recommended default for normal rides.
+- `deep`: broader POI and source checks.
+- `ultra`: highest paranoia mode for long or risky rides.
+
+No OpenAI, Codex, or GitHub write token belongs in the public browser app. Production should use ChatGPT Apps SDK authentication plus a GitHub OAuth/App install for the user's own repo, then run Codex via the user's private secrets or environment.
+
+Official technical direction:
+
+- OpenAI Apps SDK: https://developers.openai.com/apps-sdk/
+- Apps SDK authentication: https://developers.openai.com/apps-sdk/build/auth/
+- Codex SDK: https://developers.openai.com/codex/sdk
+- Codex non-interactive mode: https://developers.openai.com/codex/noninteractive
+- Codex GitHub Action: https://developers.openai.com/codex/github-action
+
+## Legacy Intake Worker
+
+The older central intake worker is still parked in:
+
+`intake-worker/`
+
+It can validate GPX and write requests into GitHub, but it is not wired into the homepage and should be treated as dev-only. It is not the target architecture for private user GPX builds because central storage would put privacy and compute responsibility on Jonas.
+
+Current limitation: a static GitHub Pages page cannot push a file directly into this Codex chat by itself because a GitHub write token cannot live safely in public browser code. The user-owned ChatGPT-App path solves that by moving writes and route intelligence into authenticated server/tool calls and private user resources.
+
+Worker source, if needed for reference:
 
 `intake-worker/src/worker.js`
 
@@ -59,7 +89,7 @@ Configure and deploy it with:
 - `GITHUB_BRANCH`: `pages`
 - `PUBLIC_ORIGIN`: `https://jonasmarcuswalter.github.io`
 
-If this feature returns later, add a public config file with `window.RAID_RADAR_INTAKE_ENDPOINT`.
+If this feature returns later, prefer adapting it to target private user repositories rather than the public Raid Radar repo.
 
 ## Current Builds
 
