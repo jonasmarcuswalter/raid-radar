@@ -223,7 +223,7 @@ function bindEvents() {
 function configureAppShell() {
   const appName = state.meta?.app_name || "Offline Race";
   const routeName = state.meta?.route_name || appName;
-  const brandName = state.meta?.brand_name || "Raid Radar";
+  const brandName = state.meta?.brand_name || state.meta?.short_name || appName;
   document.title = `${brandName} · ${routeName}`;
   const heading = document.querySelector(".topbar h1");
   if (heading) heading.textContent = routeName;
@@ -248,9 +248,9 @@ function configureAppShell() {
 }
 
 function basemapLabel(status) {
-  if (status === "online-osm") return "Online OSM basemap · Route/POIs cached";
+  if (status === "online-osm") return "Online OSM basemap · Route/Raids cached";
   if (status === "pmtiles") return "Offline PMTiles basemap";
-  if (status === "corridor-vector") return "Offline corridor map · Route/POIs cached";
+  if (status === "corridor-vector") return "Offline corridor map · Route/Raids cached";
   return `Offline schematic basemap · ${status === "pending" ? "PMTiles pending" : status}`;
 }
 
@@ -269,7 +269,7 @@ function setupLeafletMap() {
       attribution: "&copy; OpenStreetMap contributors",
     }).addTo(map);
   } else if (els.mapHint) {
-    els.mapHint.textContent = state.mapPack ? "Offline-Kartenpack aktiv · ohne Online-Tiles" : "Offline: Route/POIs ohne Basemap";
+    els.mapHint.textContent = state.mapPack ? "Offline-Kartenpack aktiv · ohne Online-Tiles" : "Offline: Route/Raids ohne Basemap";
   }
   map.createPane("offlineMapPane");
   map.getPane("offlineMapPane").style.zIndex = 350;
@@ -331,7 +331,7 @@ async function loadOfflineMapPack({ quiet = false, force = false } = {}) {
     if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
     state.mapPack = await response.json();
     if (els.mapHint && state.meta?.basemap?.status === "corridor-vector") {
-      els.mapHint.textContent = "Offline corridor map · Route/POIs cached";
+      els.mapHint.textContent = "Offline corridor map · Route/Raids cached";
     }
     if (state.leaflet?.offlineMapLayer) {
       renderLeafletMapPack(state.leaflet.offlineMapLayer);
@@ -586,6 +586,7 @@ function renderNextCards() {
         (poi.critical || poi.source_status !== "unverified") &&
         isLikelyAvailableAtArrival(poi),
     ) ||
+    nextPoi((poi) => isCaloriePoi(poi) && poi.route_km >= km && poi.source_status !== "unverified") ||
     nextPoi((poi) => isCaloriePoi(poi) && poi.route_km >= km);
   const nextFuel =
     nextPoi(
@@ -660,11 +661,11 @@ function stopCardHtml(poi) {
   const visited = state.visited.has(poi.id) ? " active" : "";
   return `<article class="list-card${selected}" data-poi="${poi.id}">
     <h3>${escapeHtml(poi.name)}</h3>
-    <div class="list-meta">${poi.category} · km ${poi.route_km.toFixed(1)} · ${delta >= 0 ? `in ${delta.toFixed(1)} km` : `${Math.abs(delta).toFixed(1)} km zurück`} · ${poi.distance_from_route_m} m von GPX</div>
+    <div class="list-meta">${escapeHtml(raidKind(poi))} · km ${poi.route_km.toFixed(1)} · ${delta >= 0 ? `in ${delta.toFixed(1)} km` : `${Math.abs(delta).toFixed(1)} km zurück`} · ${poi.distance_from_route_m} m von GPX</div>
     <div class="list-meta">${escapeHtml(availabilityAtArrival(poi).label)} · Quelle: ${escapeHtml(poi.source_status)}</div>
     <div class="card-actions">
-      <button class="mini${pinned}" data-action="pin" data-poi="${poi.id}" type="button">Pin</button>
-      <button class="mini${visited}" data-action="visited" data-poi="${poi.id}" type="button">Visited</button>
+      <button class="mini${pinned}" data-action="pin" data-poi="${poi.id}" type="button">Merken</button>
+      <button class="mini${visited}" data-action="visited" data-poi="${poi.id}" type="button">Geraidet</button>
     </div>
   </article>`;
 }
@@ -685,7 +686,7 @@ function renderGaps() {
       return `<article class="list-card${active ? " selected" : ""}">
         <h3>${escapeHtml(gap.section)}</h3>
         <div class="list-meta">km ${gap.km_range[0]}-${gap.km_range[1]}</div>
-        <p><strong>Letzter sicherer Stop:</strong> ${escapeHtml(gap.last_reliable_stop)}</p>
+        <p><strong>Letzter sicherer Raid:</strong> ${escapeHtml(gap.last_reliable_stop)}</p>
         <p><strong>Backup:</strong> ${escapeHtml(gap.backup)}</p>
         <p><strong>Mitnehmen:</strong> ${escapeHtml(gap.carry)}</p>
       </article>`;
@@ -705,27 +706,28 @@ function renderSelectedPoi() {
   const poi = state.selectedPoi;
   if (!poi) {
     els.selectedPoi.className = "detail empty";
-    els.selectedPoi.textContent = "Tippe einen Stop an oder nutze die Demo-Positionen.";
+    els.selectedPoi.textContent = "Tippe eine Raid Option an oder nutze die Demo-Positionen.";
     return;
   }
   const delta = poi.route_km - (state.current?.snap?.km ?? 0);
   const availability = availabilityAtArrival(poi);
   const warnings = [];
-  if (availability.state !== "open") warnings.push(`Verfügbarkeit: ${availability.label}. Nicht blind als sicheren Stop planen.`);
+  if (availability.state !== "open") warnings.push(`Verfügbarkeit: ${availability.label}. Nicht blind als sicheren Raid planen.`);
   if (poi.source_status !== "official") warnings.push(`Quelle ist ${poi.source_status}. In der Rennwoche final prüfen.`);
   els.selectedPoi.className = "detail";
   els.selectedPoi.innerHTML = `<h2>${escapeHtml(poi.name)}</h2>
     <div class="list-meta">${escapeHtml(poi.address)}</div>
     <div class="detail-grid">
+      <span class="pill">${escapeHtml(raidKind(poi))}</span>
       <span class="pill">km ${poi.route_km.toFixed(1)}</span>
       <span class="pill">${delta >= 0 ? `in ${delta.toFixed(1)} km` : `${Math.abs(delta).toFixed(1)} km zurück`}</span>
       <span class="pill">${poi.distance_from_route_m} m off GPX</span>
     </div>
-    <p><strong>Geplante Ankunft:</strong> ${escapeHtml(availability.arrivalLabel)} · ${escapeHtml(availability.label)}</p>
+    <p><strong>Raid-Fenster:</strong> ${escapeHtml(availability.label)}</p>
     <p><strong>Leave Point:</strong> km ${poi.gpx_exit_km.toFixed(1)} · ${escapeHtml(poi.access_note)}.</p>
     <p>${escapeHtml(poi.race_use_note || "Routennahe Option.")}</p>
     ${warnings.map((w) => `<div class="warning">${escapeHtml(w)}</div>`).join("")}
-    <p><a href="${poi.google_maps_place_link}" target="_blank" rel="noreferrer">Google Maps online öffnen</a></p>`;
+    <p><a href="${poi.google_maps_place_link}" target="_blank" rel="noreferrer">Google Maps zum Raid öffnen</a></p>`;
 }
 
 function renderStatus() {
@@ -742,7 +744,7 @@ function renderStatus() {
     `Build: ${state.meta.build_time_utc}`,
     `Network: ${online}`,
     routeLine,
-    `POIs: ${state.meta.verified_poi_count} verified · ${state.meta.critical_poi_count} critical`,
+    `Raid Options: ${state.meta.verified_poi_count} verified · ${state.meta.critical_poi_count} hot`,
     `Basemap: ${state.meta.basemap.status} · ${state.meta.basemap.note}`,
     current ? `Position: ${current.fix.label} · snapped km ${current.snap.km.toFixed(1)} · off-route ${Math.round(current.snap.distance_m)} m` : "Position: none",
     current ? `Heading: ${current.heading === null ? "unknown" : `${Math.round(current.heading)}°`} ${current.headingWeak ? "(weak)" : ""}` : "",
@@ -870,7 +872,7 @@ function normalizeMapPackStatus({ cached = false, loaded = false } = {}) {
     return {
       status: "missing",
       label: configured.label || "Offline-Kartenpack",
-      note: configured.note || "PMTiles-Kartenpack ist noch nicht hinterlegt. Route, POIs und GPS funktionieren trotzdem offline.",
+      note: configured.note || "PMTiles-Kartenpack ist noch nicht hinterlegt. Route, Raid Options und GPS funktionieren trotzdem offline.",
     };
   }
   const savedStatus = state.offline.mapPack?.status || "available";
@@ -965,7 +967,7 @@ function renderOfflinePanel(snapshot = state.offline.snapshot) {
     (snapshot?.markerReady ?? false) &&
     (snapshot?.leafletReady ?? false);
   els.offlineSummary.innerHTML = `<strong>${ready ? "Kern-App offline bereit" : "Offline-Kern noch prüfen"}</strong>
-    ${ready ? "App-Shell, Service Worker, Route, POIs, Marker und Leaflet sind gecached." : "Tippe zuerst auf Kern offline speichern, dann auf Offline prüfen. Wenn Service Worker noch nicht aktiv ist: einmal neu laden."}
+    ${ready ? "App-Shell, Service Worker, Route, Raid Options, Marker und Leaflet sind gecached." : "Tippe zuerst auf Kern offline speichern, dann auf Offline prüfen. Wenn Service Worker noch nicht aktiv ist: einmal neu laden."}
     ${mapPackUsable ? " Kartenpack ist gespeichert und als Basemap vorbereitet." : mapPack.status === "stored" ? " Kartenpack ist gespeichert, aber die Basemap-Anzeige folgt noch." : " Vollständige Offline-Basemap folgt über PMTiles."}`;
   const lastCheck = snapshot?.checkedAt || state.offline.lastCheck || "noch nicht geprüft";
   const storage = snapshot?.storage;
@@ -976,7 +978,7 @@ function renderOfflinePanel(snapshot = state.offline.snapshot) {
   const cards = [
     offlineCard("App Shell", core.cachedCount >= 6 ? "ready" : "warn", `${core.cachedCount}/${core.total} Kern-Dateien im Cache`),
     offlineCard("Route", snapshot?.routeReady ? "ready" : "missing", snapshot?.routeReady ? `${state.route?.total_km?.toFixed(1) || "--"} km Route cached` : "route.json fehlt im Cache"),
-    offlineCard("POIs", snapshot?.poisReady ? "ready" : "missing", snapshot?.poisReady ? `${state.pois.length} Stops offline verfügbar` : "pois.json fehlt im Cache"),
+    offlineCard("Raid Options", snapshot?.poisReady ? "ready" : "missing", snapshot?.poisReady ? `${state.pois.length} Raids offline verfügbar` : "pois.json fehlt im Cache"),
     offlineCard("Rider Marker", snapshot?.markerReady ? "ready" : "missing", snapshot?.markerReady ? "Foto-Marker cached" : "Marker-Bilder fehlen im Cache"),
     offlineCard("Map Library", snapshot?.leafletReady ? "ready" : "missing", snapshot?.leafletReady ? "Leaflet lokal cached" : "Leaflet fehlt im Cache"),
     offlineCard("Service Worker", serviceWorkerReady ? "ready" : "warn", serviceWorkerReady ? "aktiv und kontrolliert diese App" : "noch nicht aktiv kontrollierend; App einmal neu laden"),
@@ -1381,6 +1383,20 @@ function isCaloriePoi(poi) {
   return isFoodPoi(poi) || poi.category === "fuel";
 }
 
+function raidKind(poi) {
+  const labels = {
+    supermarket: "Supermarkt Raid",
+    fuel: "Tankstellen Raid",
+    restaurant: "Restaurant Raid",
+    cafe: "Cafe Raid",
+    fast_food: "Fast-Food Raid",
+    bakery: "Baecker Raid",
+    convenience: "Kiosk Raid",
+    drinking_water: "Wasser Raid",
+  };
+  return labels[poi.category] || "Raid Option";
+}
+
 function poiColor(poi) {
   if (poi.category === "fuel") return "#2f6fbb";
   if (poi.category === "drinking_water") return "#1e9ab0";
@@ -1447,8 +1463,8 @@ function openingState(hours, date) {
 }
 
 function humanOpeningState(stateName, hours) {
-  if (stateName === "open") return `likely open (${hours})`;
-  if (stateName === "closed") return `closed (${hours})`;
+  if (stateName === "open") return `raidbar (${hours})`;
+  if (stateName === "closed") return `geschlossen (${hours})`;
   if (stateName === "unverified") return "unverified";
   return `check (${hours})`;
 }
