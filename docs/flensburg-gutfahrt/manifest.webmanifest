@@ -1,0 +1,25 @@
+{
+  "name": "Flensburg Gutfahrt Race Cockpit",
+  "short_name": "Flensburg",
+  "description": "Offline race cockpit for the Flensburg Gutfahrt Sunday route.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f8f6",
+  "theme_color": "#15392c",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "./assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
