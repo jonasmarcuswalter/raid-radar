@@ -2,24 +2,27 @@
 
 Static offline race-cockpit PWA for testing GPX routes, POIs, route snapping, and iPhone/Safari service-worker behavior.
 
-## Published App
+## Published Apps
 
-GitHub Pages is configured to publish from `main` / `docs`.
+GitHub Pages is configured to publish from the `pages` branch, `/docs`.
 
-After the first Pages deployment finishes, the app URL is:
+Launcher:
 
 https://deinemuttersitztaufmeinemlenker.github.io/race-cockpit/
 
-## Current Build
+Route apps:
 
-The current `docs/` build contains the iPhone test route:
+- Zürich test: https://deinemuttersitztaufmeinemlenker.github.io/race-cockpit/zuerich-test/
+- Hamburg Backyard: https://deinemuttersitztaufmeinemlenker.github.io/race-cockpit/hamburg-backyard/
 
-- `Rennrad-Tour nach Chnuschper-Hüsli`
-- 39.8 km
-- 1024 GPX points
-- 4 test POIs
+## Current Builds
 
-The app shell, GPX route, POIs, marker assets, and Leaflet library are cached by the service worker. The OSM basemap is online for this test build; a true offline basemap should use PMTiles.
+Each route app lives in its own subfolder with its own manifest and service worker scope:
+
+- `docs/zuerich-test/`: current iPhone GPX test route, 39.8 km, 4 test POIs
+- `docs/hamburg-backyard/`: Hamburg Backyard Ultra draft route, 701.4 km, 381 POIs, 77 critical POIs
+
+The app shell, GPX route, POIs, marker assets, and Leaflet library are cached by each app service worker. The OSM basemap is online for inspection; a true offline basemap should use PMTiles.
 
 ## Skill Backup
 
