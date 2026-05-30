@@ -17,6 +17,7 @@ const CORE_OFFLINE_ASSETS = [
   "./data/gaps.json",
   "./data/segments.json",
   "./data/app-meta.json",
+  "./assets/raid-radar-logo.svg",
   "./assets/rider-marker.png",
   "./assets/rider-marker@2x.png",
   "./assets/icon-192.png",
@@ -464,6 +465,7 @@ function onPositionError(error) {
 }
 
 function setDemoPosition(km, label) {
+  state.selectedPoi = null;
   const point = routePointAtKm(km);
   const total = state.route?.total_km || km;
   const heading = bearingBetween(routePointAtKm(Math.max(0, km - 0.2)), routePointAtKm(Math.min(total, km + 0.2)));
@@ -577,12 +579,12 @@ function renderNextCards() {
   const nextFood =
     nextPoi(
       (poi) =>
-        isFoodPoi(poi) &&
+        isCaloriePoi(poi) &&
         poi.route_km >= km &&
         (poi.critical || poi.source_status !== "unverified") &&
         isLikelyAvailableAtArrival(poi),
     ) ||
-    nextPoi((poi) => isFoodPoi(poi) && poi.route_km >= km);
+    nextPoi((poi) => isCaloriePoi(poi) && poi.route_km >= km);
   const nextFuel =
     nextPoi(
       (poi) =>
@@ -1371,6 +1373,10 @@ function matchesMapFilter(poi) {
 
 function isFoodPoi(poi) {
   return ["supermarket", "restaurant", "cafe", "fast_food", "bakery", "convenience"].includes(poi.category);
+}
+
+function isCaloriePoi(poi) {
+  return isFoodPoi(poi) || poi.category === "fuel";
 }
 
 function poiColor(poi) {
