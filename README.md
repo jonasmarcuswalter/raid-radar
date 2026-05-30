@@ -2,6 +2,8 @@
 
 Static offline Raid Radar PWA for GPX routes, next-raid decisions, route snapping, POIs, and iPhone/Safari service-worker behavior.
 
+Brand claim: `Find the next raid before the bonk finds you`.
+
 ## Published Apps
 
 GitHub Pages is configured to publish from the `pages` branch, `/docs`.

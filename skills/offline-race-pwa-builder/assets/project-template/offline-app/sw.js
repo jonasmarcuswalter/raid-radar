@@ -1,5 +1,5 @@
-const CACHE_NAME = "gpx-iphone-test-offline-v1-2026-05-30T171500z0000";
-const CACHE_PREFIX = "gpx-iphone-test-offline-v1-";
+const CACHE_NAME = "raid-radar-template-offline-v1-2026-05-30T171500z0000";
+const CACHE_PREFIX = "raid-radar-template-offline-v1-";
 const ASSETS = [
   "./",
   "./index.html",

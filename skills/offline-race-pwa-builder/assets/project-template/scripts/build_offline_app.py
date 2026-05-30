@@ -345,9 +345,9 @@ def resolve_km(value: object, total_km: float, default: float) -> float:
 
 def write_manifest(app_name: str, short_name: str) -> None:
     manifest = {
-        "name": f"{app_name} Cockpit",
-        "short_name": short_name,
-        "description": "Offline race cockpit for route, resupply, and leave-point decisions.",
+        "name": f"Raid Radar · {app_name}",
+        "short_name": "Raid Radar",
+        "description": "Offline Raid Radar for route, resupply, and next-raid decisions.",
         "start_url": "./index.html",
         "scope": "./",
         "display": "standalone",
@@ -434,10 +434,17 @@ def build(args: argparse.Namespace) -> dict:
                 "renderer": "pending",
                 "expected_size_mb": None,
                 "note": (
-                    "PMTiles-Kartenpack ist noch nicht hinterlegt. Route, POIs, Marker und Cockpit "
+                    "PMTiles-Kartenpack ist noch nicht hinterlegt. Route, POIs, Marker und Raid Radar "
                     "funktionieren nach Kern-Cache trotzdem offline; Basemap-Anzeige folgt erst mit PMTiles-Renderer."
                 ),
             },
+        ),
+        "brand_name": config.get("brand_name", "Raid Radar"),
+        "route_name": config.get("route_name", app_name),
+        "brand_tagline": config.get("brand_tagline", "Find the next raid before the bonk finds you"),
+        "raid_vocabulary": config.get(
+            "raid_vocabulary",
+            "Next Raid = nächste verlässliche Versorgung; Raid Options = Supermarkt, Tankstelle, Restaurant, Cafe, Baecker oder Kiosk entlang der Route.",
         ),
     }
 

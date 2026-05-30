@@ -1,8 +1,8 @@
-# Offline Race PWA Plan
+# Raid Radar PWA Plan
 
 ## Summary
 
-Build a static HTTPS Progressive Web App for iPhone/Safari that runs offline during Hamburg Backyard Ultra. The app shows the draft/final GPX, offline map tiles, current location, distance along route, next resupply options, critical gaps, and route-leave points for off-route POIs.
+Build a static HTTPS Progressive Web App for iPhone/Safari that runs offline during Hamburg Backyard Ultra. The app shows the draft/final GPX, offline map tiles, current location, distance along route, next raid options, critical gaps, and route-leave points for off-route POIs.
 
 ## Delivery
 
@@ -44,10 +44,10 @@ Build a static HTTPS Progressive Web App for iPhone/Safari that runs offline dur
 
 ## Race UI
 
-- Cockpit: current route-km, remaining km, off-route distance, GPS accuracy, next critical POI, next open food option, next fuel/24h option.
+- Raid Radar: current route-km, remaining km, off-route distance, GPS accuracy, Next Raid, Food Raid, and Tankstellen Raid.
 - Map: route, offline basemap, rider marker, CP/finish/RBO markers, POIs, leave-point lines.
 - POI details: opening hours for Thu/Fri/Sat/Sun, source status, distance from route, GPX exit km, exact return-to-leave-point reminder, Google Maps link as online fallback.
-- Filters: critical, supermarket, fuel, bike help, water/shelter, open-now/likely-open, 24h.
+- Filters: Hot Raids, Food Raid, Tank Raid, bike help, water/shelter, raidbar/likely open, 24h.
 - Local state: pin stops, mark visited, hide irrelevant stops, store last known route-km.
 
 ## Detours

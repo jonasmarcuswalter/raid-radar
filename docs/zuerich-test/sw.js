@@ -1,5 +1,5 @@
-const CACHE_NAME = "zuerich-test-offline-v1-2026-05-30T184900z0000";
-const CACHE_PREFIX = "zuerich-test-offline-v1-";
+const CACHE_NAME = "raid-radar-zuerich-test-offline-v1-2026-05-30T185810z0000";
+const CACHE_PREFIX = "raid-radar-zuerich-test-offline-v1-";
 const ASSETS = [
   "./",
   "./index.html",

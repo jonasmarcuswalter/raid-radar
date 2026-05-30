@@ -62,6 +62,7 @@ const state = {
 };
 
 const els = {};
+const BRAND_CLAIM = "Find the next raid before the bonk finds you";
 
 function loadMapPackStatus() {
   try {
@@ -226,7 +227,7 @@ function configureAppShell() {
   const heading = document.querySelector(".topbar h1");
   if (heading) heading.textContent = routeName;
   const eyebrow = document.querySelector(".topbar .eyebrow");
-  if (eyebrow && state.meta?.brand_tagline) eyebrow.textContent = state.meta.brand_tagline;
+  if (eyebrow) eyebrow.textContent = state.meta?.brand_tagline || BRAND_CLAIM;
   const appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]');
   if (appleTitle) appleTitle.setAttribute("content", brandName);
   const brand = document.querySelector(".brand-name");

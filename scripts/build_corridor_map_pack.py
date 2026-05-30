@@ -72,7 +72,7 @@ out body geom;
 
 def fetch_overpass(query: str, timeout: int, endpoint: str) -> dict:
     data = urllib.parse.urlencode({"data": query}).encode("utf-8")
-    req = urllib.request.Request(endpoint, data=data, headers={"User-Agent": "race-cockpit-offline-map-pack/1.0"})
+    req = urllib.request.Request(endpoint, data=data, headers={"User-Agent": "raid-radar-offline-map-pack/1.0"})
     with urllib.request.urlopen(req, timeout=timeout + 20) as response:
         return json.loads(response.read().decode("utf-8"))
 
@@ -198,7 +198,7 @@ def build_pack(args: argparse.Namespace) -> dict:
 
     features = sorted(features_by_id.values(), key=lambda f: (f["type"], f["kind"], f.get("name", ""), f["id"]))
     pack = {
-        "schema": "race-cockpit-corridor-map-v1",
+        "schema": "raid-radar-corridor-map-v1",
         "build_time_utc": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "source": "openstreetmap-overpass" if features else "empty",
         "route_total_km": route.get("total_km"),

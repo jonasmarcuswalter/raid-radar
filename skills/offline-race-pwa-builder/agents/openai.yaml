@@ -1,4 +1,4 @@
 interface:
-  display_name: "Offline Race PWA Builder"
-  short_description: "Build offline race cockpit PWAs."
-  default_prompt: "Build or update an offline race PWA from GPX and POI data, then verify local, HTTPS, iPhone, and offline behavior."
+  display_name: "Raid Radar PWA Builder"
+  short_description: "Build offline Raid Radar PWAs."
+  default_prompt: "Build or update a Raid Radar PWA from GPX and POI data, then verify local, HTTPS, iPhone, and offline behavior."

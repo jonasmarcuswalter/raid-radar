@@ -1,4 +1,4 @@
-const MANUAL_CACHE_NAME = "race-cockpit-manual-offline-v1";
+const MANUAL_CACHE_NAME = "raid-radar-manual-offline-v1";
 const OFFLINE_MAP_PACK_KEY_PREFIX = "offlineMapPackStatus:";
 const LAST_OFFLINE_CHECK_KEY = "lastOfflineCheck";
 const CORE_OFFLINE_ASSETS = [
@@ -62,6 +62,7 @@ const state = {
 };
 
 const els = {};
+const BRAND_CLAIM = "Find the next raid before the bonk finds you";
 
 function loadMapPackStatus() {
   try {
@@ -220,11 +221,17 @@ function bindEvents() {
 
 function configureAppShell() {
   const appName = state.meta?.app_name || "Offline Race";
-  document.title = `${appName} Cockpit`;
+  const routeName = state.meta?.route_name || appName;
+  const brandName = state.meta?.brand_name || "Raid Radar";
+  document.title = `${brandName} · ${routeName}`;
   const heading = document.querySelector(".topbar h1");
-  if (heading) heading.textContent = state.meta?.short_name || appName;
+  if (heading) heading.textContent = routeName;
+  const eyebrow = document.querySelector(".topbar .eyebrow");
+  if (eyebrow) eyebrow.textContent = state.meta?.brand_tagline || BRAND_CLAIM;
   const appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]');
-  if (appleTitle) appleTitle.setAttribute("content", state.meta?.short_name || appName);
+  if (appleTitle) appleTitle.setAttribute("content", brandName);
+  const brand = document.querySelector(".brand-name");
+  if (brand) brand.textContent = brandName;
   if (els.mapHint && state.meta?.basemap?.status) {
     els.mapHint.textContent = basemapLabel(state.meta.basemap.status);
   }
@@ -585,9 +592,9 @@ function renderNextCards() {
         isLikelyAvailableAtArrival(poi),
     ) ||
     nextPoi((poi) => poi.category === "fuel" && poi.route_km >= km);
-  renderNextCard(els.nextCritical, "Nächster Critical", nextCritical);
-  renderNextCard(els.nextFood, "Nächste Verpflegung", nextFood);
-  renderNextCard(els.nextFuel, "Nächste Tankstelle", nextFuel);
+  renderNextCard(els.nextCritical, "Next Raid", nextCritical);
+  renderNextCard(els.nextFood, "Food Raid", nextFood);
+  renderNextCard(els.nextFuel, "Tankstellen Raid", nextFuel);
 }
 
 function nextPoi(predicate) {
@@ -596,7 +603,7 @@ function nextPoi(predicate) {
 
 function renderNextCard(el, title, poi) {
   if (!poi) {
-    el.innerHTML = `<span>${title}</span><strong>Keiner mehr</strong><small>Route fast durch.</small>`;
+    el.innerHTML = `<span>${title}</span><strong>Nichts mehr zu raiden</strong><small>Route fast durch.</small>`;
     el.onclick = null;
     return;
   }

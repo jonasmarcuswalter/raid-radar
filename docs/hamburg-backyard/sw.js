@@ -1,5 +1,5 @@
-const CACHE_NAME = "hamburg-backyard-offline-v1-2026-05-30T184900z0000";
-const CACHE_PREFIX = "hamburg-backyard-offline-v1-";
+const CACHE_NAME = "raid-radar-hamburg-backyard-offline-v1-2026-05-30T185810z0000";
+const CACHE_PREFIX = "raid-radar-hamburg-backyard-offline-v1-";
 const ASSETS = [
   "./",
   "./index.html",

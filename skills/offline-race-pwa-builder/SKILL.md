@@ -1,9 +1,9 @@
 ---
 name: offline-race-pwa-builder
-description: Build, regenerate, test, and deploy reusable offline race-cockpit PWAs from GPX routes, verified POI CSVs, rider marker assets, GitHub Pages hosting, and optional PMTiles offline map packs. Use when Codex needs to create or update a cycling/race web app with route snapping, POIs, service-worker caching, iPhone/Safari testing, GitHub Pages deployment, or offline map-pack planning.
+description: Build, regenerate, test, and deploy reusable Raid Radar PWAs from GPX routes, verified POI CSVs, rider marker assets, GitHub Pages hosting, and optional PMTiles offline map packs. Use when Codex needs to create or update a cycling/race web app with route snapping, next-raid POIs, service-worker caching, iPhone/Safari testing, GitHub Pages deployment, or offline map-pack planning.
 ---
 
-# Offline Race PWA Builder
+# Raid Radar PWA Builder
 
 ## Core Workflow
 
