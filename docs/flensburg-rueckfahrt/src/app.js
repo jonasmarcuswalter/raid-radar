@@ -46,6 +46,7 @@ const state = {
   current: null,
   previousFix: null,
   watchId: null,
+  gpsStarting: false,
   raceDay: localStorage.getItem("raceDay") || "thu",
   filter: "critical",
   search: "",
@@ -422,25 +423,88 @@ function setBadge(text, mode = "") {
   els.offlineBadge.className = `badge ${mode}`.trim();
 }
 
-function toggleGps() {
-  if (state.watchId !== null) {
-    navigator.geolocation.clearWatch(state.watchId);
-    state.watchId = null;
-    els.gpsButton.textContent = "GPS starten";
-    logStatus("GPS stopped.");
+async function toggleGps() {
+  if (state.watchId !== null || state.gpsStarting) {
+    stopGps();
     return;
   }
   if (!navigator.geolocation) {
     logStatus("Geolocation is not available in this browser.");
     return;
   }
+  state.gpsStarting = true;
+  state.centerOnRider = true;
+  state.selectedPoi = null;
+  els.gpsButton.disabled = true;
+  els.gpsButton.textContent = "GPS fragt...";
+  const permission = await geolocationPermissionState();
+  logStatus(
+    permission
+      ? `GPS permission status: ${permission}. Asking iPhone/Safari for current position...`
+      : "GPS permission request started. iPhone/Safari should ask for location access now.",
+  );
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      state.gpsStarting = false;
+      els.gpsButton.disabled = false;
+      onPosition(position);
+      startGpsWatch();
+      logStatus("GPS fix received. Map follows live position.");
+    },
+    (error) => {
+      state.gpsStarting = false;
+      els.gpsButton.disabled = false;
+      if (error.code === error.PERMISSION_DENIED) {
+        els.gpsButton.textContent = "GPS starten";
+        onPositionError(error);
+        logStatus("If no prompt appears on iPhone: Settings > Safari > Location, or delete/re-add the Home Screen app permission.");
+        return;
+      }
+      onPositionError(error);
+      startGpsWatch();
+    },
+    gpsOptions(),
+  );
+}
+
+function startGpsWatch() {
+  if (state.watchId !== null || !navigator.geolocation) return;
   state.watchId = navigator.geolocation.watchPosition(onPosition, onPositionError, {
-    enableHighAccuracy: true,
-    maximumAge: 1000,
-    timeout: 12000,
+    ...gpsOptions(),
+    maximumAge: 2000,
   });
   els.gpsButton.textContent = "GPS stoppen";
-  logStatus("GPS watch started. iPhone will ask for location permission.");
+  els.gpsButton.disabled = false;
+  logStatus("GPS watch active.");
+}
+
+function stopGps() {
+  if (state.watchId !== null) {
+    navigator.geolocation.clearWatch(state.watchId);
+    state.watchId = null;
+  }
+  state.gpsStarting = false;
+  els.gpsButton.disabled = false;
+  els.gpsButton.textContent = "GPS starten";
+  logStatus("GPS stopped.");
+}
+
+function gpsOptions() {
+  return {
+    enableHighAccuracy: true,
+    maximumAge: 0,
+    timeout: 15000,
+  };
+}
+
+async function geolocationPermissionState() {
+  if (!navigator.permissions?.query) return "";
+  try {
+    const result = await navigator.permissions.query({ name: "geolocation" });
+    return result.state || "";
+  } catch {
+    return "";
+  }
 }
 
 function onPosition(position) {
@@ -457,6 +521,8 @@ function onPosition(position) {
   if (fix.heading === null) {
     fix.heading = deriveHeading(state.current?.fix || state.previousFix, fix);
   }
+  state.selectedPoi = null;
+  state.centerOnRider = true;
   updateCurrentFromFix(fix);
   state.previousFix = fix;
   renderAll();
@@ -486,7 +552,8 @@ function setDemoPosition(km, label) {
 }
 
 function updateCurrentFromFix(fix, forcedSnap = null) {
-  const snap = forcedSnap || snapToRoute(fix.lat, fix.lon, state.current?.snap?.km ?? null);
+  const preferredKm = state.current?.fix?.label === "GPS" ? (state.current?.snap?.km ?? null) : null;
+  const snap = forcedSnap || snapToRoute(fix.lat, fix.lon, preferredKm);
   state.current = {
     fix,
     snap,
