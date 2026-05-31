@@ -1,4 +1,4 @@
-const MANUAL_CACHE_NAME = "raid-radar-flensburg-rueckfahrt-manual-offline-v1";
+const MANUAL_CACHE_NAME = "raid-radar-flensburg-rueckfahrt-manual-offline-v1-gpsdiag";
 const OFFLINE_MAP_PACK_KEY_PREFIX = "offlineMapPackStatus:";
 const LAST_OFFLINE_CHECK_KEY = "lastOfflineCheck";
 const CORE_OFFLINE_ASSETS = [
@@ -47,6 +47,13 @@ const state = {
   previousFix: null,
   watchId: null,
   gpsStarting: false,
+  gpsDiagnostic: {
+    build: "2026-05-31 gpsdiag",
+    permission: "unknown",
+    lastEvent: "not started",
+    lastError: "",
+    lastFix: "",
+  },
   raceDay: localStorage.getItem("raceDay") || "thu",
   filter: "critical",
   search: "",
@@ -144,6 +151,7 @@ function cacheElements() {
     "gpsButton",
     "centerButton",
     "mapHint",
+    "gpsDiagnostic",
     "selectedPoi",
     "filters",
     "stopSearch",
@@ -204,6 +212,7 @@ function bindEvents() {
     setBadge("Offline", "ready");
     renderOfflinePanel();
   });
+  navigator.serviceWorker?.addEventListener("controllerchange", renderGpsDiagnostic);
   els.raceDaySelect.value = state.raceDay;
   els.raceDaySelect.addEventListener("change", () => {
     state.raceDay = els.raceDaySelect.value;
@@ -409,6 +418,7 @@ async function registerServiceWorker() {
     if (registration.waiting) registration.waiting.postMessage({ type: "SKIP_WAITING" });
     await navigator.serviceWorker.ready;
     setBadge(navigator.onLine ? "Cached" : "Offline", "ready");
+    renderGpsDiagnostic();
     logStatus(`Service Worker ready: ${registration.scope}`);
     checkOfflineReadiness({ quiet: true });
   } catch (error) {
@@ -423,12 +433,13 @@ function setBadge(text, mode = "") {
   els.offlineBadge.className = `badge ${mode}`.trim();
 }
 
-async function toggleGps() {
+function toggleGps() {
   if (state.watchId !== null || state.gpsStarting) {
     stopGps();
     return;
   }
   if (!navigator.geolocation) {
+    updateGpsDiagnostic({ lastEvent: "geolocation unavailable", lastError: "navigator.geolocation missing" });
     logStatus("Geolocation is not available in this browser.");
     return;
   }
@@ -437,16 +448,13 @@ async function toggleGps() {
   state.selectedPoi = null;
   els.gpsButton.disabled = true;
   els.gpsButton.textContent = "GPS fragt...";
-  const permission = await geolocationPermissionState();
-  logStatus(
-    permission
-      ? `GPS permission status: ${permission}. Asking iPhone/Safari for current position...`
-      : "GPS permission request started. iPhone/Safari should ask for location access now.",
-  );
+  updateGpsDiagnostic({ lastEvent: "requesting current position", lastError: "" });
+  logStatus("GPS request started. iPhone/Safari should ask for location access now.");
   navigator.geolocation.getCurrentPosition(
     (position) => {
       state.gpsStarting = false;
       els.gpsButton.disabled = false;
+      updateGpsDiagnostic({ lastEvent: "first fix received", lastError: "" });
       onPosition(position);
       startGpsWatch();
       logStatus("GPS fix received. Map follows live position.");
@@ -454,7 +462,8 @@ async function toggleGps() {
     (error) => {
       state.gpsStarting = false;
       els.gpsButton.disabled = false;
-      if (error.code === error.PERMISSION_DENIED) {
+      updateGpsDiagnostic({ lastEvent: "initial fix failed", lastError: gpsErrorMessage(error) });
+      if (isGpsPermissionDenied(error)) {
         els.gpsButton.textContent = "GPS starten";
         onPositionError(error);
         logStatus("If no prompt appears on iPhone: Settings > Safari > Location, or delete/re-add the Home Screen app permission.");
@@ -465,6 +474,11 @@ async function toggleGps() {
     },
     gpsOptions(),
   );
+  geolocationPermissionState().then((permission) => {
+    if (!permission) return;
+    updateGpsDiagnostic({ permission });
+    logStatus(`GPS permission status: ${permission}.`);
+  }).catch((error) => logStatus(`GPS permission status check skipped: ${error.message}`));
 }
 
 function startGpsWatch() {
@@ -475,10 +489,11 @@ function startGpsWatch() {
   });
   els.gpsButton.textContent = "GPS stoppen";
   els.gpsButton.disabled = false;
+  updateGpsDiagnostic({ lastEvent: "watch active", lastError: "" });
   logStatus("GPS watch active.");
 }
 
-function stopGps() {
+function stopGps({ keepDiagnostic = false } = {}) {
   if (state.watchId !== null) {
     navigator.geolocation.clearWatch(state.watchId);
     state.watchId = null;
@@ -486,6 +501,7 @@ function stopGps() {
   state.gpsStarting = false;
   els.gpsButton.disabled = false;
   els.gpsButton.textContent = "GPS starten";
+  if (!keepDiagnostic) updateGpsDiagnostic({ lastEvent: "stopped", lastError: "" });
   logStatus("GPS stopped.");
 }
 
@@ -525,11 +541,46 @@ function onPosition(position) {
   state.centerOnRider = true;
   updateCurrentFromFix(fix);
   state.previousFix = fix;
+  updateGpsDiagnostic({
+    lastEvent: "live fix",
+    lastError: "",
+    lastFix: `${fix.lat.toFixed(5)}, ${fix.lon.toFixed(5)} · ±${Math.round(fix.accuracy || 0)} m`,
+  });
   renderAll();
 }
 
 function onPositionError(error) {
-  logStatus(`GPS error: ${error.message}`);
+  const message = gpsErrorMessage(error);
+  updateGpsDiagnostic({ lastEvent: "position error", lastError: message });
+  logStatus(`GPS error: ${message}`);
+  if (isGpsPermissionDenied(error) && state.watchId !== null) {
+    stopGps({ keepDiagnostic: true });
+    logStatus("GPS stopped after location permission was denied.");
+  }
+}
+
+function gpsErrorMessage(error) {
+  return `${gpsErrorKind(error)}: ${error.message || "no details"}`;
+}
+
+function isGpsPermissionDenied(error) {
+  return gpsErrorKind(error) === "permission denied";
+}
+
+function gpsErrorKind(error) {
+  const code = Number(error?.code);
+  const permissionDenied = Number(error?.PERMISSION_DENIED || 1);
+  const positionUnavailable = Number(error?.POSITION_UNAVAILABLE || 2);
+  const timeout = Number(error?.TIMEOUT || 3);
+  const label =
+    code === permissionDenied
+      ? "permission denied"
+      : code === positionUnavailable
+        ? "position unavailable"
+        : code === timeout
+          ? "timeout"
+          : "unknown";
+  return label;
 }
 
 function setDemoPosition(km, label) {
@@ -620,8 +671,36 @@ function renderAll() {
   renderStops();
   renderGaps();
   renderStatus();
+  renderGpsDiagnostic();
   renderOfflinePanel();
   drawMap();
+}
+
+function updateGpsDiagnostic(patch) {
+  state.gpsDiagnostic = { ...state.gpsDiagnostic, ...patch };
+  renderGpsDiagnostic();
+}
+
+function renderGpsDiagnostic() {
+  if (!els.gpsDiagnostic) return;
+  const secure = window.isSecureContext ? "yes" : "no";
+  const standalone =
+    window.matchMedia?.("(display-mode: standalone)")?.matches || window.navigator?.standalone ? "yes" : "no";
+  const sw = navigator.serviceWorker?.controller ? "controlled" : "not controlling yet";
+  const support = navigator.geolocation ? "available" : "missing";
+  const help = state.gpsDiagnostic.lastError.includes("permission denied")
+    ? "\nFix: iPhone Einstellungen > Datenschutz & Sicherheit > Ortungsdienste. Safari bzw. diese Home-Screen-App erlauben. Wenn es klemmt: Home-Screen-App löschen und neu hinzufügen."
+    : "";
+  els.gpsDiagnostic.textContent = [
+    `GPS build: ${state.gpsDiagnostic.build}`,
+    `Support: ${support} · Secure: ${secure} · PWA: ${standalone} · SW: ${sw}`,
+    `Permission: ${state.gpsDiagnostic.permission}`,
+    `Last: ${state.gpsDiagnostic.lastEvent}`,
+    state.gpsDiagnostic.lastFix ? `Fix: ${state.gpsDiagnostic.lastFix}` : "",
+    state.gpsDiagnostic.lastError ? `Error: ${state.gpsDiagnostic.lastError}${help}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
 }
 
 function renderCockpit() {

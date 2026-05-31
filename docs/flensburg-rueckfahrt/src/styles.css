@@ -379,6 +379,19 @@ h1 {
   z-index: 500;
 }
 
+.gps-diagnostic {
+  margin: 8px 0;
+  border: 1px solid rgba(208, 122, 45, 0.25);
+  border-radius: 8px;
+  padding: 10px 12px;
+  background: #fff7ed;
+  color: #704314;
+  font-size: 12px;
+  font-weight: 750;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
 .detail {
   margin-top: 10px;
   padding: 12px;
